@@ -7,7 +7,7 @@ public struct MoveOutcome: Hashable, Sendable {
     public var bonusesAwarded: [MoveValue] = []
 }
 
-/// Classic race-home rules. Every function here is pure, so the host can apply a move
+/// The classic race-home rules. Every function here is pure, so the host can apply a move
 /// and hand the resulting state to the other device with no hidden context.
 public enum Rules {
 

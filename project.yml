@@ -17,6 +17,8 @@ targets:
     sources:
       - path: App/Sources
       - path: App/Resources/Assets.xcassets
+      - path: App/Resources/Sounds
+        buildPhase: resources
     dependencies:
       - package: Parjamie
         product: ParjamieEngine

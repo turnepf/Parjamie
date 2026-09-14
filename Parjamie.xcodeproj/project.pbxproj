@@ -10,10 +10,14 @@
 		08313682ACDF6C6EBE4317CD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFA08B581A3B4DAF8F11C566 /* Assets.xcassets */; };
 		24E50124C1125D40DF3C5CF2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714737E2AB25950DC0148D34 /* Theme.swift */; };
 		2FE860A20336048E1381E7B9 /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0680F4462C09C0C893DF8E7E /* LobbyView.swift */; };
+		5B8904DB469E10A84D02D490 /* burst.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCD49919B5DF3A818A222D8F /* burst.wav */; };
+		9919E43141608E278FA74DD3 /* sizzle.wav in Resources */ = {isa = PBXBuildFile; fileRef = 40C69D377EE45388C255A27C /* sizzle.wav */; };
 		9FE8A51EAC9666B9A104044C /* ParjamieNet in Frameworks */ = {isa = PBXBuildFile; productRef = 1E417820269079549451F213 /* ParjamieNet */; };
 		ACE5AE3B5A9DFD5035F29F57 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A365AC16B0682B4AD40B7E47 /* GameView.swift */; };
 		AEB76F2E92C4A0AFF356107B /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB82E920B2773644403644A /* BoardView.swift */; };
 		BB6E7C5559C2808D45F61512 /* DiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FE5289B5D6ED2B1B6ED31C /* DiceView.swift */; };
+		C3C6F31D621840313708AD04 /* arc.wav in Resources */ = {isa = PBXBuildFile; fileRef = DA1C2C5DA750D8A27B05AA84 /* arc.wav */; };
+		C6271452B1562B125935C073 /* Effects.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E9201B94A672D43A21CCC6 /* Effects.swift */; };
 		DA4295D9BF3C04338EA359F9 /* ParjamieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E79AE7381721BA0886CF7E59 /* ParjamieApp.swift */; };
 		F7C08181CDB867C5A4FC26EF /* ParjamieEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 6D7A79ACE6DEACDF57B629E0 /* ParjamieEngine */; };
 /* End PBXBuildFile section */
@@ -22,12 +26,16 @@
 		03FE5289B5D6ED2B1B6ED31C /* DiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiceView.swift; sourceTree = "<group>"; };
 		05B1FE3E5DBA1F4B0D65BF39 /* Parjamie */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Parjamie; path = .; sourceTree = SOURCE_ROOT; };
 		0680F4462C09C0C893DF8E7E /* LobbyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyView.swift; sourceTree = "<group>"; };
+		40C69D377EE45388C255A27C /* sizzle.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sizzle.wav; sourceTree = "<group>"; };
 		714737E2AB25950DC0148D34 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		913EA0CEF272E54E665F762C /* Parjamie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Parjamie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2E9201B94A672D43A21CCC6 /* Effects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Effects.swift; sourceTree = "<group>"; };
 		A365AC16B0682B4AD40B7E47 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		BFB82E920B2773644403644A /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
+		DA1C2C5DA750D8A27B05AA84 /* arc.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = arc.wav; sourceTree = "<group>"; };
 		E79AE7381721BA0886CF7E59 /* ParjamieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParjamieApp.swift; sourceTree = "<group>"; };
 		EFA08B581A3B4DAF8F11C566 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FCD49919B5DF3A818A222D8F /* burst.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = burst.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,11 +51,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B926832B1C7F8763C143AEA /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				DA1C2C5DA750D8A27B05AA84 /* arc.wav */,
+				FCD49919B5DF3A818A222D8F /* burst.wav */,
+				40C69D377EE45388C255A27C /* sizzle.wav */,
+			);
+			path = Sounds;
+			sourceTree = "<group>";
+		};
 		3DEA952B55FD73760A656197 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				BFB82E920B2773644403644A /* BoardView.swift */,
 				03FE5289B5D6ED2B1B6ED31C /* DiceView.swift */,
+				A2E9201B94A672D43A21CCC6 /* Effects.swift */,
 				A365AC16B0682B4AD40B7E47 /* GameView.swift */,
 				0680F4462C09C0C893DF8E7E /* LobbyView.swift */,
 				E79AE7381721BA0886CF7E59 /* ParjamieApp.swift */,
@@ -67,6 +86,7 @@
 		47AB262507CF2E6DBE5DE117 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				0B926832B1C7F8763C143AEA /* Sounds */,
 				EFA08B581A3B4DAF8F11C566 /* Assets.xcassets */,
 			);
 			path = Resources;
@@ -165,6 +185,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				08313682ACDF6C6EBE4317CD /* Assets.xcassets in Resources */,
+				C3C6F31D621840313708AD04 /* arc.wav in Resources */,
+				5B8904DB469E10A84D02D490 /* burst.wav in Resources */,
+				9919E43141608E278FA74DD3 /* sizzle.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,6 +200,7 @@
 			files = (
 				AEB76F2E92C4A0AFF356107B /* BoardView.swift in Sources */,
 				BB6E7C5559C2808D45F61512 /* DiceView.swift in Sources */,
+				C6271452B1562B125935C073 /* Effects.swift in Sources */,
 				ACE5AE3B5A9DFD5035F29F57 /* GameView.swift in Sources */,
 				2FE860A20336048E1381E7B9 /* LobbyView.swift in Sources */,
 				DA4295D9BF3C04338EA359F9 /* ParjamieApp.swift in Sources */,

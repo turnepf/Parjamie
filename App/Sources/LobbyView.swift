@@ -6,6 +6,8 @@ struct LobbyView: View {
     @Bindable var session: MatchSession
     @State private var setup: PawnSetup = .oneColorEach
     @AppStorage(PlayerName.key) private var playerName = ""
+    @AppStorage(HintSetting.key) private var showHints = true
+    @AppStorage(SoundSetting.key) private var playSounds = true
     @FocusState private var nameFocused: Bool
 
     private var trimmedName: String {
@@ -82,6 +84,32 @@ struct LobbyView: View {
                     setupRow(option)
                 }
             }
+
+            Toggle(isOn: $showHints) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Show hints")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Palette.ink)
+                    Text("Step-by-step help on each turn while you learn.")
+                        .font(.system(size: 13, design: .rounded))
+                        .foregroundStyle(Palette.ink.opacity(0.5))
+                }
+            }
+            .tint(Palette.felt)
+            .padding(.horizontal, 14)
+
+            Toggle(isOn: $playSounds) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Shop sounds")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Palette.ink)
+                    Text("Arc crackle and sparks. The silent switch mutes them too.")
+                        .font(.system(size: 13, design: .rounded))
+                        .foregroundStyle(Palette.ink.opacity(0.5))
+                }
+            }
+            .tint(Palette.felt)
+            .padding(.horizontal, 14)
 
             VStack(spacing: 12) {
                 primary("Host a game") {

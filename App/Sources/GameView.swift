@@ -5,10 +5,28 @@ import ParjamieNet
 struct GameView: View {
     @Bindable var session: MatchSession
     @State private var selectedValueID: Int?
+    @AppStorage(HintSetting.key) private var showHints = true
+    @AppStorage(SoundSetting.key) private var playSounds = true
+    @State private var effects: [BoardEffect] = []
+    @State private var showOverheated = false
+    @State private var moveTick = 0
+    @State private var captureTick = 0
+    @State private var homeTick = 0
+    @State private var overheatTick = 0
+    @State private var winTick = 0
 
     var body: some View {
         if let game = session.game {
             board(game)
+                .onChange(of: session.game) { old, new in
+                    guard let old, let new else { return }
+                    celebrate(GameEvents.between(old, new))
+                }
+                .sensoryFeedback(.impact(weight: .light), trigger: moveTick)
+                .sensoryFeedback(.impact(weight: .heavy, intensity: 1), trigger: captureTick)
+                .sensoryFeedback(.success, trigger: homeTick)
+                .sensoryFeedback(.warning, trigger: overheatTick)
+                .sensoryFeedback(.success, trigger: winTick)
         }
     }
 
@@ -17,6 +35,7 @@ struct GameView: View {
     private func board(_ game: GameState) -> some View {
         VStack(spacing: 0) {
             header(game)
+            hintCard(game)
             Spacer(minLength: 0)
 
             BoardView(
@@ -24,6 +43,7 @@ struct GameView: View {
                 viewingColor: viewingColor(game),
                 movable: movablePawns(game),
                 selected: nil,
+                effects: effects,
                 onTap: { tap($0, in: game) }
             )
             .padding(.horizontal, 10)
@@ -36,9 +56,17 @@ struct GameView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .overlay {
             if let winner = game.winner {
-                winnerBanner(game, winner: winner)
+                CertifiedPlate(
+                    winnerName: name(of: winner, in: game),
+                    isMine: winner == session.mySeat || session.role == .local,
+                    onNewGame: { session.startNewGame(setup: game.setup) }
+                )
             } else if session.status == .reconnecting {
                 reconnectingBanner
+            } else if showOverheated {
+                OverheatedBanner()
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    .allowsHitTesting(false)
             }
         }
         .onChange(of: game.turn.values) { _, values in
@@ -64,6 +92,39 @@ struct GameView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
+    }
+
+    @ViewBuilder
+    private func hintCard(_ game: GameState) -> some View {
+        if showHints, session.canAct, let hint = Hints.forTurn(in: game, selectedValueID: selectedValueID) {
+            HStack(alignment: .top, spacing: 10) {
+                HelmetShape(tint: Palette.felt, lensLit: true)
+                    .frame(width: 20, height: 20)
+                Text(hint)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(Palette.ink.opacity(0.8))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Button {
+                    showHints = false
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Palette.ink.opacity(0.35))
+                        .frame(width: 24, height: 24)
+                }
+                .accessibilityLabel("Turn off hints")
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color(red: 0.99, green: 0.93, blue: 0.78))
+            )
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .animation(.easeInOut(duration: 0.2), value: hint)
+        }
     }
 
     private func diceRow(_ game: GameState) -> some View {
@@ -100,8 +161,15 @@ struct GameView: View {
                 selectedValueID = nil
                 session.roll()
         } label: {
-            Text(rollLabel(game))
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+            VStack(spacing: 1) {
+                Text(rollLabel(game))
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                if canRoll(game) {
+                    Text("roll the dice")
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .opacity(0.7)
+                }
+            }
                 .frame(maxWidth: .infinity, minHeight: 54)
                 .background(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -113,28 +181,6 @@ struct GameView: View {
         .disabled(!canRoll(game))
         .padding(.horizontal, 20)
         .padding(.bottom, 12)
-    }
-
-    private func winnerBanner(_ game: GameState, winner: Seat) -> some View {
-        VStack(spacing: 18) {
-            Text(winner == session.mySeat || session.role == .local ? "Winner" : "Well played")
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                .tracking(2)
-                .foregroundStyle(Palette.ink.opacity(0.5))
-            Text(name(of: winner, in: game))
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundStyle(Palette.ink)
-            Button("New game") { session.startNewGame(setup: game.setup) }
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
-                .foregroundStyle(Palette.parchment)
-                .padding(.horizontal, 28)
-                .padding(.vertical, 14)
-                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Palette.felt))
-        }
-        .padding(36)
-        .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Palette.parchment))
-        .shadow(color: .black.opacity(0.2), radius: 30, y: 10)
-        .padding(30)
     }
 
     private var reconnectingBanner: some View {
@@ -178,19 +224,64 @@ struct GameView: View {
     private func subhead(_ game: GameState) -> String {
         if case .lost(let reason) = session.status { return reason }
         if session.status == .reconnecting { return "Reconnecting to \(session.peerName ?? "the other phone")…" }
-        if game.turn.phase == .awaitingRoll { return "Roll the dice" }
+        if game.winner != nil { return "Tap New game for a rematch" }
+        if game.turn.phase == .awaitingRoll { return session.canAct ? "Strike an arc to roll" : "Waiting for the roll" }
         if !session.canAct { return "Watching" }
         if game.turn.values.isEmpty { return "No moves left" }
         return selectedValueID == nil ? "Pick a number, then a pawn" : "Tap a pawn to move it"
     }
 
     private func rollLabel(_ game: GameState) -> String {
+        if game.winner != nil { return "Game over" }
         if game.turn.phase == .moving { return "Move a pawn" }
-        return session.canAct ? "Roll" : "Waiting"
+        return session.canAct ? "Strike an arc" : "Waiting"
     }
 
     private func canRoll(_ game: GameState) -> Bool {
         session.canAct && game.turn.phase == .awaitingRoll
+    }
+
+    // MARK: Game moments
+
+    private func celebrate(_ events: [GameEvent]) {
+        guard !events.isEmpty else { return }
+        var sound: ShopSounds.Effect?
+        for event in events {
+            switch event {
+            case .moved:
+                moveTick += 1
+                sound = sound ?? .arc
+            case .captured(let pawn, let spot):
+                add(BoardEffect(kind: .sparks, position: spot, color: pawn.color, label: "+20"))
+                captureTick += 1
+                sound = .burst
+            case .reachedHome(let pawn):
+                add(BoardEffect(kind: .homeFlash, position: .home, color: pawn.color, label: "+10"))
+                homeTick += 1
+                if sound != .sizzle { sound = .burst }
+            case .overheated(let pawn, let spot):
+                add(BoardEffect(kind: .overheat, position: spot, color: pawn.color))
+                overheatTick += 1
+                sound = .sizzle
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { showOverheated = true }
+                Task {
+                    try? await Task.sleep(for: .seconds(2.2))
+                    withAnimation(.easeOut(duration: 0.3)) { showOverheated = false }
+                }
+            case .won:
+                winTick += 1
+                sound = .burst
+            }
+        }
+        if playSounds, let sound { ShopSounds.shared.play(sound) }
+    }
+
+    private func add(_ effect: BoardEffect) {
+        effects.append(effect)
+        Task {
+            try? await Task.sleep(for: BoardEffect.lifetime)
+            effects.removeAll { $0.id == effect.id }
+        }
     }
 
     // MARK: Moves

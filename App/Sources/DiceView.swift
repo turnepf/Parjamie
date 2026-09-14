@@ -17,15 +17,27 @@ struct DieFace: View {
         GeometryReader { proxy in
             let side = min(proxy.size.width, proxy.size.height)
             ZStack {
-                RoundedRectangle(cornerRadius: side * 0.22, style: .continuous)
-                    .fill(Palette.parchment)
-                    .shadow(color: .black.opacity(0.18), radius: side * 0.06, y: side * 0.04)
-                RoundedRectangle(cornerRadius: side * 0.22, style: .continuous)
-                    .stroke(Palette.trackEdge, lineWidth: 1)
+                // A machined steel block with punched pips.
+                RoundedRectangle(cornerRadius: side * 0.18, style: .continuous)
+                    .fill(.linearGradient(
+                        Gradient(colors: [Color(white: 0.90), Color(white: 0.62)]),
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ))
+                    .shadow(color: .black.opacity(0.28), radius: side * 0.06, y: side * 0.04)
+                RoundedRectangle(cornerRadius: side * 0.18, style: .continuous)
+                    .stroke(Palette.seam.opacity(0.7), lineWidth: 1)
                 ForEach(Array((Self.layouts[value] ?? []).enumerated()), id: \.offset) { _, spot in
                     Circle()
-                        .fill(Palette.ink)
-                        .frame(width: side * 0.16, height: side * 0.16)
+                        .fill(.radialGradient(
+                            Gradient(colors: [Palette.ink, Palette.ink.opacity(0.75)]),
+                            center: UnitPoint(x: 0.65, y: 0.65), startRadius: 0, endRadius: side * 0.09
+                        ))
+                        .overlay(
+                            Circle().trim(from: 0.55, to: 0.95)
+                                .stroke(.white.opacity(0.7), lineWidth: side * 0.018)
+                                .rotationEffect(.degrees(-20))
+                        )
+                        .frame(width: side * 0.15, height: side * 0.15)
                         .position(x: side * spot.0, y: side * spot.1)
                 }
             }

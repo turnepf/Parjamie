@@ -20,6 +20,11 @@ enum PlayerName {
     static let key = "playerName"
 }
 
+/// Turn-by-turn coaching for people learning the game. On unless the player turns it off.
+enum HintSetting {
+    static let key = "showHints"
+}
+
 struct RootView: View {
     @Bindable var session: MatchSession
     @Environment(\.scenePhase) private var scenePhase

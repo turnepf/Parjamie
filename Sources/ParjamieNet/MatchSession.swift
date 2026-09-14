@@ -235,12 +235,20 @@ public final class MatchSession {
     public func startNewGame(setup: PawnSetup) {
         switch role {
         case .host, .local:
-            game = GameState(setup: setup)
+            game = freshGame(setup: setup)
             lastOutcome = nil
             broadcast()
         case .guest:
             link?.send(.requestNewGame(setup))
         }
+    }
+
+    /// A new board whose version keeps counting up from the old game, because the guest
+    /// ignores any snapshot older than the one it already has.
+    private func freshGame(setup: PawnSetup) -> GameState {
+        var fresh = GameState(setup: setup)
+        fresh.version = (game?.version ?? 0) + 1
+        return fresh
     }
 
     // MARK: Message handling
@@ -276,7 +284,7 @@ public final class MatchSession {
             broadcast()
 
         case .requestNewGame(let setup):
-            game = GameState(setup: setup)
+            game = freshGame(setup: setup)
             lastOutcome = nil
             broadcast()
 
