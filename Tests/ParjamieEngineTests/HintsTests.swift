@@ -21,7 +21,7 @@ final class HintsTests: XCTestCase {
 
     func testFirstRollExplainsTheFive() throws {
         let hint = try XCTUnwrap(Hints.forTurn(in: state(), selectedValueID: nil))
-        XCTAssertTrue(hint.hasPrefix("Tap Strike an Arc to roll."))
+        XCTAssertTrue(hint.hasPrefix("Tap Strike an arc to roll."))
         XCTAssertTrue(hint.contains("need a 5"))
     }
 

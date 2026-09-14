@@ -25,14 +25,14 @@ public enum Hints {
 
     private static func rollHint(in state: GameState) -> String {
         if state.turn.consecutiveDoubles > 0 {
-            return "You rolled doubles, so you get another roll. Tap Strike an Arc."
+            return "You rolled doubles, so you get another roll. Tap Strike an arc."
         }
         let pawns = state.pawns(for: state.turn.seat)
         let noneInPlay = pawns.allSatisfy { $0.isInNest || $0.isHome }
         if noneInPlay {
-            return "Tap Strike an Arc to roll. To bring a helmet out of your bay you need a 5: one die showing 5, or both dice adding up to 5."
+            return "Tap Strike an arc to roll. To bring a helmet out of your bay you need a 5: one die showing 5, or both dice adding up to 5."
         }
-        return "Tap Strike an Arc to roll the dice."
+        return "Tap Strike an arc to roll the dice."
     }
 
     // MARK: A number is picked
