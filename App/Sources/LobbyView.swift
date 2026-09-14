@@ -16,9 +16,9 @@ struct LobbyView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: 24)
+            Spacer(minLength: 16)
             title
-            Spacer(minLength: 24)
+            Spacer(minLength: 20)
 
             switch session.status {
             case .idle:
@@ -30,86 +30,81 @@ struct LobbyView: View {
             case .lost(let reason):
                 problem(reason)
             case .playing, .reconnecting:
-                ProgressView()
+                ProgressView().tint(Palette.arc)
             }
 
-            Spacer(minLength: 24)
+            Spacer(minLength: 16)
         }
-        .padding(.horizontal, 28)
+        .padding(.horizontal, 24)
+        .background { ShopBackdrop().ignoresSafeArea() }
+        .preferredColorScheme(.dark)
         .animation(.easeInOut(duration: 0.2), value: session.discovered)
     }
 
     private var title: some View {
-        VStack(spacing: 8) {
-            Text("Parjamie")
-                .font(.system(size: 42, weight: .bold, design: .rounded))
-                .foregroundStyle(Palette.felt)
+        VStack(spacing: 6) {
+            ZStack {
+                Circle()
+                    .fill(.radialGradient(colors: [Palette.arc.opacity(0.55), .clear], center: .center, startRadius: 0, endRadius: 46))
+                    .frame(width: 92, height: 92)
+                    .offset(x: 18, y: 16)
+                HelmetShape(tint: Palette.color(.red), lensLit: true)
+                    .frame(width: 58, height: 58)
+                    .shadow(color: .black.opacity(0.5), radius: 6, y: 4)
+            }
+            .frame(height: 64)
+            Text("PARJAMIE")
+                .font(.system(size: 38, weight: .black, design: .rounded))
+                .tracking(3)
+                .foregroundStyle(.linearGradient(colors: [Color(white: 0.97), Color(white: 0.7)], startPoint: .top, endPoint: .bottom))
+                .shadow(color: .black.opacity(0.6), radius: 0, y: 2)
+            WeldBead()
+                .frame(width: 180, height: 7)
             Text("The race home, for two")
-                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .tracking(1.5)
-                .foregroundStyle(Palette.ink.opacity(0.45))
+                .foregroundStyle(Palette.arc)
+                .padding(.top, 2)
         }
     }
 
     // MARK: Choosing a game
 
     private var start: some View {
-        VStack(spacing: 26) {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Your name")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .tracking(1.4)
-                    .foregroundStyle(Palette.ink.opacity(0.45))
-                TextField("So the other player knows it's you", text: $playerName)
+        VStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 8) {
+                sectionLabel("Your name")
+                TextField("", text: $playerName, prompt: Text("So the other player knows it's you").foregroundStyle(.white.opacity(0.35)))
                     .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Palette.ink)
+                    .foregroundStyle(.white)
+                    .tint(Palette.arc)
                     .textContentType(.givenName)
                     .textInputAutocapitalization(.words)
                     .autocorrectionDisabled()
                     .submitLabel(.done)
                     .focused($nameFocused)
                     .padding(14)
+                    .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(.black.opacity(0.4)))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(Palette.ink.opacity(nameFocused ? 0.3 : 0.1), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(nameFocused ? Palette.arc : .white.opacity(0.14), lineWidth: nameFocused ? 1.5 : 1)
                     )
             }
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Pawns")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .tracking(1.4)
-                    .foregroundStyle(Palette.ink.opacity(0.45))
+            VStack(alignment: .leading, spacing: 8) {
+                sectionLabel("Pawns")
                 ForEach(PawnSetup.allCases, id: \.self) { option in
                     setupRow(option)
                 }
             }
 
-            Toggle(isOn: $showHints) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Show hints")
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Palette.ink)
-                    Text("Step-by-step help on each turn while you learn.")
-                        .font(.system(size: 13, design: .rounded))
-                        .foregroundStyle(Palette.ink.opacity(0.5))
-                }
+            VStack(spacing: 12) {
+                settingToggle("Show hints", detail: "Step-by-step help on each turn while you learn.", isOn: $showHints)
+                settingToggle("Shop sounds", detail: "Arc crackle and sparks. The silent switch mutes them too.", isOn: $playSounds)
             }
-            .tint(Palette.felt)
+            .padding(.vertical, 12)
             .padding(.horizontal, 14)
-
-            Toggle(isOn: $playSounds) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Shop sounds")
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Palette.ink)
-                    Text("Arc crackle and sparks. The silent switch mutes them too.")
-                        .font(.system(size: 13, design: .rounded))
-                        .foregroundStyle(Palette.ink.opacity(0.5))
-                }
-            }
-            .tint(Palette.felt)
-            .padding(.horizontal, 14)
+            .steelPlate()
 
             VStack(spacing: 12) {
                 primary("Host a game") {
@@ -126,44 +121,62 @@ struct LobbyView: View {
                 .opacity(trimmedName.isEmpty ? 0.4 : 1)
                 Button("Both of us on this phone") { session.startLocalGame(setup: setup) }
                     .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundStyle(Palette.ink.opacity(0.5))
+                    .foregroundStyle(.white.opacity(0.55))
                     .padding(.top, 2)
             }
         }
     }
 
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(.system(size: 12, weight: .bold, design: .monospaced))
+            .tracking(2)
+            .foregroundStyle(.white.opacity(0.5))
+            .padding(.leading, 2)
+    }
+
+    private func settingToggle(_ title: String, detail: String, isOn: Binding<Bool>) -> some View {
+        Toggle(isOn: isOn) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                Text(detail)
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.5))
+            }
+        }
+        .tint(Palette.arc)
+    }
+
     private func setupRow(_ option: PawnSetup) -> some View {
-        Button {
+        let chosen = setup == option
+        return Button {
             setup = option
         } label: {
             HStack(spacing: 14) {
-                Circle()
-                    .stroke(setup == option ? Palette.felt : Palette.ink.opacity(0.25), lineWidth: 2)
-                    .frame(width: 22, height: 22)
-                    .overlay {
-                        if setup == option {
-                            Circle().fill(Palette.felt).frame(width: 11, height: 11)
-                        }
-                    }
+                // A little helmet lens stands in for the radio button, lit when chosen.
+                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                    .fill(chosen
+                          ? AnyShapeStyle(.linearGradient(colors: [Color(red: 1, green: 0.95, blue: 0.7), Palette.arc], startPoint: .leading, endPoint: .trailing))
+                          : AnyShapeStyle(Color(red: 0.06, green: 0.12, blue: 0.09)))
+                    .frame(width: 26, height: 12)
+                    .padding(4)
+                    .background(RoundedRectangle(cornerRadius: 5, style: .continuous).fill(Color(white: 0.12)))
+                    .shadow(color: chosen ? Palette.arc.opacity(0.8) : .clear, radius: 6)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(option.title)
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Palette.ink)
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
                     Text(option.detail)
-                        .font(.system(size: 13, design: .rounded))
-                        .foregroundStyle(Palette.ink.opacity(0.5))
+                        .font(.system(size: 12, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.55))
                 }
                 Spacer(minLength: 0)
             }
-            .padding(14)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(setup == option ? Palette.felt.opacity(0.07) : .clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Palette.ink.opacity(setup == option ? 0.18 : 0.1), lineWidth: 1)
-            )
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
+            .steelPlate(highlighted: chosen)
         }
         .buttonStyle(.plain)
     }
@@ -172,49 +185,47 @@ struct LobbyView: View {
 
     private var waiting: some View {
         VStack(spacing: 18) {
-            ProgressView().controlSize(.large)
+            ProgressView().controlSize(.large).tint(Palette.arc)
             Text("Waiting for the other phone")
                 .font(.system(size: 19, weight: .semibold, design: .rounded))
-                .foregroundStyle(Palette.ink)
+                .foregroundStyle(.white)
             Text("On the other device, tap Join a game and pick \(session.displayName).")
                 .font(.system(size: 14, design: .rounded))
-                .foregroundStyle(Palette.ink.opacity(0.55))
+                .foregroundStyle(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
             cancel
         }
+        .padding(24)
+        .steelPlate()
     }
 
     private var searching: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
             if session.discovered.isEmpty {
-                ProgressView().controlSize(.large)
+                ProgressView().controlSize(.large).tint(Palette.arc)
                 Text("Looking for a game nearby")
                     .font(.system(size: 19, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Palette.ink)
+                    .foregroundStyle(.white)
                 Text("Both phones need to be on the same Wi-Fi, and the other one has to be hosting.")
                     .font(.system(size: 14, design: .rounded))
-                    .foregroundStyle(Palette.ink.opacity(0.55))
+                    .foregroundStyle(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
             } else {
-                Text("Tap a game to join")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .tracking(1.4)
-                    .foregroundStyle(Palette.ink.opacity(0.45))
+                sectionLabel("Tap a game to join")
                 ForEach(session.discovered) { peer in
                     Button { session.join(peer) } label: {
-                        HStack {
+                        HStack(spacing: 12) {
+                            HelmetShape(tint: Palette.color(.yellow), lensLit: true)
+                                .frame(width: 26, height: 26)
                             Text(peer.name)
                                 .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                .foregroundStyle(Palette.ink)
+                                .foregroundStyle(.white)
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .foregroundStyle(Palette.ink.opacity(0.3))
+                                .foregroundStyle(Palette.arc)
                         }
                         .padding(16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(Palette.felt.opacity(0.07))
-                        )
+                        .steelPlate()
                     }
                     .buttonStyle(.plain)
                 }
@@ -225,33 +236,42 @@ struct LobbyView: View {
 
     private func problem(_ reason: String) -> some View {
         VStack(spacing: 16) {
-            Image(systemName: "wifi.exclamationmark")
-                .font(.system(size: 34))
-                .foregroundStyle(Palette.color(.red))
+            Image(systemName: "bolt.trianglebadge.exclamationmark.fill")
+                .font(.system(size: 36))
+                .foregroundStyle(Palette.arc)
             Text(reason)
                 .font(.system(size: 16, weight: .medium, design: .rounded))
-                .foregroundStyle(Palette.ink)
+                .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
             primary("Start over") { session.stop() }
         }
+        .padding(24)
+        .steelPlate()
     }
 
     private var cancel: some View {
         Button("Cancel") { session.stop() }
             .font(.system(size: 15, weight: .medium, design: .rounded))
-            .foregroundStyle(Palette.ink.opacity(0.5))
+            .foregroundStyle(.white.opacity(0.55))
             .padding(.top, 6)
     }
 
     // MARK: Buttons
 
+    /// Glows like a struck arc.
     private func primary(_ label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(.system(size: 18, weight: .bold, design: .rounded))
                 .frame(maxWidth: .infinity, minHeight: 54)
-                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Palette.felt))
-                .foregroundStyle(Palette.parchment)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(.linearGradient(colors: [Color(red: 1, green: 0.72, blue: 0.3), Palette.arc, Color(red: 0.85, green: 0.38, blue: 0.05)],
+                                              startPoint: .top, endPoint: .bottom))
+                )
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(.white.opacity(0.35), lineWidth: 1))
+                .shadow(color: Palette.arc.opacity(0.45), radius: 12, y: 2)
+                .foregroundStyle(Palette.ink)
         }
         .buttonStyle(.plain)
     }
@@ -261,9 +281,78 @@ struct LobbyView: View {
             Text(label)
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .frame(maxWidth: .infinity, minHeight: 54)
-                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Palette.felt.opacity(0.1)))
-                .foregroundStyle(Palette.felt)
+                .foregroundStyle(.white)
+                .steelPlate()
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Shop pieces
+
+/// Dark brushed steel with a faint arc glow, behind the setup screens.
+struct ShopBackdrop: View {
+    var body: some View {
+        Canvas { context, size in
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .linearGradient(
+                Gradient(colors: [Color(red: 0.13, green: 0.14, blue: 0.16), Color(red: 0.06, green: 0.07, blue: 0.08)]),
+                startPoint: .zero, endPoint: CGPoint(x: size.width, y: size.height)
+            ))
+            var grain = Path()
+            var y: CGFloat = 2
+            var i = 0
+            while y < size.height {
+                grain.move(to: CGPoint(x: CGFloat(i % 3) * 8, y: y))
+                grain.addLine(to: CGPoint(x: size.width - CGFloat((i * 7) % 4) * 6, y: y))
+                y += 3 + CGFloat((i * 5) % 3)
+                i += 1
+            }
+            context.stroke(grain, with: .color(.white.opacity(0.03)), lineWidth: 1)
+            let glow = CGPoint(x: size.width * 0.62, y: size.height * 0.1)
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .radialGradient(
+                Gradient(colors: [Palette.arc.opacity(0.16), .clear]), center: glow, startRadius: 0, endRadius: size.width * 0.8
+            ))
+        }
+    }
+}
+
+/// A short run of weld bead, used as a rule under the title.
+struct WeldBead: View {
+    var body: some View {
+        Canvas { context, size in
+            let r = size.height / 2
+            var x = r
+            while x < size.width - r {
+                let dot = CGRect(x: x - r, y: 0, width: r * 2, height: r * 2)
+                context.fill(Path(ellipseIn: dot), with: .radialGradient(
+                    Gradient(colors: [Color(white: 0.95), Palette.bead, Palette.beadEdge]),
+                    center: CGPoint(x: x - r * 0.35, y: r * 0.65), startRadius: 0, endRadius: r * 1.3
+                ))
+                x += r * 1.3
+            }
+        }
+    }
+}
+
+private struct SteelPlate: ViewModifier {
+    var highlighted = false
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(.linearGradient(colors: [Color(white: 0.27), Color(white: 0.17)], startPoint: .top, endPoint: .bottom))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(highlighted ? Palette.arc : .white.opacity(0.12), lineWidth: highlighted ? 1.5 : 1)
+            )
+            .shadow(color: highlighted ? Palette.arc.opacity(0.3) : .black.opacity(0.4), radius: highlighted ? 8 : 4, y: 2)
+    }
+}
+
+extension View {
+    func steelPlate(highlighted: Bool = false) -> some View {
+        modifier(SteelPlate(highlighted: highlighted))
     }
 }
