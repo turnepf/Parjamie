@@ -12,6 +12,9 @@ struct BoardView: View {
     let movable: Set<PawnID>
     let selected: PawnID?
     var effects: [BoardEffect] = []
+    var guides = BoardGuides()
+    /// Stencilled on each color's bay, such as "YOU" or the other player's name.
+    var bayLabels: [PlayerColor: String] = [:]
     let onTap: (PawnID) -> Void
 
     var body: some View {
@@ -24,6 +27,22 @@ struct BoardView: View {
                     draw(in: &context, unit: unit)
                 }
                 .frame(width: side, height: side)
+
+                guideLayer(unit: unit)
+                    .allowsHitTesting(false)
+
+                ForEach(PlayerColor.allCases.filter { bayLabels[$0] != nil }, id: \.self) { color in
+                    Text(bayLabels[color] ?? "")
+                        .font(.system(size: unit * 0.62, weight: .heavy, design: .monospaced))
+                        .tracking(unit * 0.08)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .foregroundStyle(Palette.color(color).opacity(0.9))
+                        .frame(width: unit * 3.4)
+                        .rotationEffect(.degrees(-quarterTurns * 90))
+                        .position(point(for: nil, at: .nest, color: color, unit: unit))
+                        .allowsHitTesting(false)
+                }
 
                 ForEach(game.pawns) { pawn in
                     PawnView(
@@ -41,6 +60,15 @@ struct BoardView: View {
                 blockadeWelds(unit: unit)
                     .zIndex(3)
                     .allowsHitTesting(false)
+
+                ForEach(guides.landings, id: \.self) { landing in
+                    LandingMarker(color: landing.pawn.color)
+                        .frame(width: unit * 1.5, height: unit * 1.5)
+                        .rotationEffect(.degrees(-quarterTurns * 90))
+                        .position(point(for: nil, at: landing.position, color: landing.pawn.color, unit: unit))
+                        .zIndex(2.5)
+                        .allowsHitTesting(false)
+                }
 
                 ForEach(effects) { effect in
                     EffectView(effect: effect, unit: unit)
@@ -222,15 +250,15 @@ struct BoardView: View {
         if let owner = PlayerColor.allCases.first(where: { Board.entryIndex(for: $0) == index }) {
             // Painted start square, with its tack weld showing through.
             context.fill(Path(box.insetBy(dx: unit * 0.05, dy: unit * 0.05)), with: .color(Palette.color(owner).opacity(0.9)))
-            drawTackWeld(in: box, in: &context, unit: unit)
+            Self.drawTackWeld(in: box, in: &context, unit: unit)
         } else if Board.isSafety(ring: index) {
-            drawTackWeld(in: box, in: &context, unit: unit)
+            Self.drawTackWeld(in: box, in: &context, unit: unit)
         }
         context.stroke(Path(box), with: .color(Palette.seam.opacity(0.65)), lineWidth: unit * 0.035)
     }
 
     /// A cross of tack welds with a heat-tinted halo, marking a castle.
-    private func drawTackWeld(in box: CGRect, in context: inout GraphicsContext, unit: CGFloat) {
+    static func drawTackWeld(in box: CGRect, in context: inout GraphicsContext, unit: CGFloat) {
         let c = CGPoint(x: box.midX, y: box.midY)
         context.fill(Path(ellipseIn: box.insetBy(dx: unit * 0.1, dy: unit * 0.1)), with: .radialGradient(
             Gradient(colors: [Palette.heatTint.opacity(0.0), Palette.heatTint.opacity(0.45), Color(red: 0.35, green: 0.4, blue: 0.7).opacity(0.25), .clear]),
@@ -242,12 +270,12 @@ struct BoardView: View {
             for s in 0..<steps {
                 let t = CGFloat(s) / CGFloat(steps - 1) * 2 - 1
                 let p = CGPoint(x: c.x + reach * t * dx, y: c.y + reach * t * dy)
-                drawBeadDot(at: p, radius: unit * 0.075, in: &context)
+                Self.drawBeadDot(at: p, radius: unit * 0.075, in: &context)
             }
         }
     }
 
-    private func drawBeadDot(at p: CGPoint, radius r: CGFloat, in context: inout GraphicsContext) {
+    static func drawBeadDot(at p: CGPoint, radius r: CGFloat, in context: inout GraphicsContext) {
         let dot = Path(ellipseIn: CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2))
         context.fill(dot, with: .radialGradient(
             Gradient(colors: [Color(white: 0.93), Palette.bead, Palette.beadEdge]),
@@ -274,7 +302,7 @@ struct BoardView: View {
             let count = Int(length / spacing)
             for s in 0..<count {
                 let t = CGFloat(s) / CGFloat(count)
-                drawBeadDot(at: CGPoint(x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t), radius: unit * 0.1, in: &context)
+                Self.drawBeadDot(at: CGPoint(x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t), radius: unit * 0.1, in: &context)
             }
         }
     }
@@ -356,6 +384,49 @@ struct BoardView: View {
         context.fill(Path(ellipseIn: nozzle.insetBy(dx: unit * 0.14, dy: unit * 0.14)), with: .color(Palette.ink))
     }
 
+    // MARK: Guides
+
+    /// Learning aids drawn under the pawns: which way to travel, and a pulsing start
+    /// square when a helmet can come out.
+    private func guideLayer(unit: CGFloat) -> some View {
+        ZStack {
+            if guides.showDirection {
+                Canvas { context, _ in
+                    var arrows = Path()
+                    for index in 0..<Board.ringLength
+                    where !Board.isSafety(ring: index) {
+                        let here = BoardGeometry.cell(ring: index)
+                        let next = BoardGeometry.cell(ring: index + 1)
+                        let dx = CGFloat(next.column - here.column), dy = CGFloat(next.row - here.row)
+                        guard abs(dx) + abs(dy) == 1 else { continue }
+                        let c = center(of: here, unit: unit)
+                        let r = unit * 0.2
+                        arrows.move(to: CGPoint(x: c.x - dx * r * 0.5 - dy * r, y: c.y - dy * r * 0.5 - dx * r))
+                        arrows.addLine(to: CGPoint(x: c.x + dx * r * 0.6, y: c.y + dy * r * 0.6))
+                        arrows.addLine(to: CGPoint(x: c.x - dx * r * 0.5 + dy * r, y: c.y - dy * r * 0.5 + dx * r))
+                    }
+                    context.stroke(arrows, with: .color(.white.opacity(0.8)),
+                                   style: StrokeStyle(lineWidth: unit * 0.17, lineCap: .round, lineJoin: .round))
+                    context.stroke(arrows, with: .color(Palette.ink.opacity(0.75)),
+                                   style: StrokeStyle(lineWidth: unit * 0.09, lineCap: .round, lineJoin: .round))
+                }
+            }
+            if !guides.startSquares.isEmpty {
+                TimelineView(.animation) { timeline in
+                    let phase = timeline.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.2) / 1.2
+                    Canvas { context, _ in
+                        for color in guides.startSquares {
+                            let c = center(of: BoardGeometry.cell(ring: Board.entryIndex(for: color)), unit: unit)
+                            let r = unit * (0.55 + 0.35 * phase)
+                            context.stroke(Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)),
+                                           with: .color(Palette.arc.opacity(1 - phase)), lineWidth: unit * 0.14)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: Blockades
 
     /// Two pawns sharing a square are shown tack-welded together: nobody gets past.
@@ -368,7 +439,7 @@ struct BoardView: View {
                              with: .radialGradient(Gradient(colors: [Palette.arc.opacity(0.55), .clear]), center: c, startRadius: 0, endRadius: unit * 0.5))
                 for s in 0..<6 {
                     let y = c.y - unit * 0.34 + CGFloat(s) * unit * 0.135
-                    drawBeadDot(at: CGPoint(x: c.x, y: y), radius: unit * 0.085, in: &context)
+                    Self.drawBeadDot(at: CGPoint(x: c.x, y: y), radius: unit * 0.085, in: &context)
                 }
             }
         }
@@ -415,6 +486,40 @@ struct BoardView: View {
             let across: CGFloat = pawnID.index % 2 == 0 ? -0.3 : 0.3
             let down: CGFloat = pawnID.index < 2 ? -0.3 : 0.3
             return CGPoint(x: middle.x + across * unit, y: middle.y + down * unit)
+        }
+    }
+}
+
+/// Learning aids the game screen asks the board to show.
+struct BoardGuides: Equatable {
+    var showDirection = false
+    /// Colors whose start square should pulse because a helmet can come out now.
+    var startSquares: [PlayerColor] = []
+    /// Where each movable helmet would land with the chosen number.
+    var landings: [PawnLanding] = []
+}
+
+struct PawnLanding: Hashable {
+    let pawn: PawnID
+    let position: PawnPosition
+}
+
+/// A dashed outline of a helmet on the square a move would reach.
+struct LandingMarker: View {
+    let color: PlayerColor
+
+    var body: some View {
+        GeometryReader { proxy in
+            let size = min(proxy.size.width, proxy.size.height)
+            ZStack {
+                Circle()
+                    .stroke(Palette.arc, style: StrokeStyle(lineWidth: size * 0.06, dash: [size * 0.1, size * 0.07]))
+                    .frame(width: size * 0.78, height: size * 0.78)
+                HelmetShape(tint: Palette.color(color))
+                    .frame(width: size * 0.55, height: size * 0.55)
+                    .opacity(0.45)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
         }
     }
 }

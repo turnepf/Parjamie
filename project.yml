@@ -28,7 +28,11 @@ targets:
       path: App/Resources/Info.plist
       properties:
         CFBundleDisplayName: Parjamie
-        CFBundleShortVersionString: "1.0"
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # The app adds no encryption of its own, so TestFlight builds skip the export
+        # compliance question.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIRequiresFullScreen: true
         UISupportedInterfaceOrientations:

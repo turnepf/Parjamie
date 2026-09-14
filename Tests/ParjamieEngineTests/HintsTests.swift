@@ -33,7 +33,7 @@ final class HintsTests: XCTestCase {
 
     func testAFiveExplainsBringingAPawnOut() throws {
         let hint = try XCTUnwrap(Hints.forTurn(in: state(values: [(5, .die), (3, .die)]), selectedValueID: nil))
-        XCTAssertTrue(hint.contains("tap the 5, then a glowing pawn in your nest"))
+        XCTAssertTrue(hint.contains("tap the 5, then a glowing helmet in your bay"))
     }
 
     func testDiceAddingToFiveAreNamed() throws {
@@ -45,13 +45,35 @@ final class HintsTests: XCTestCase {
         let game = state(placing: [(red(0), redEntry)], values: [(2, .die), (3, .die)])
         let hint = try XCTUnwrap(Hints.forTurn(in: game, selectedValueID: 0))
         XCTAssertTrue(hint.contains("uses your 2 and 3 together"))
-        XCTAssertTrue(hint.contains("Or tap a glowing pawn on the board to move it 2 spaces"))
+        XCTAssertTrue(hint.contains("Or tap a glowing helmet on the board to move it 2 spaces"))
     }
 
     func testBlockadeOnTheStartingSquareIsExplained() throws {
         let game = state(placing: [(red(0), redEntry), (red(1), redEntry)], values: [(5, .die), (4, .die)])
         let hint = try XCTUnwrap(Hints.forTurn(in: game, selectedValueID: nil))
         XCTAssertTrue(hint.contains("blocks it"))
+    }
+
+    func testTappingANestHelmetWithoutAFiveExplainsTheFive() {
+        let game = state(values: [(3, .die), (4, .die)])
+        XCTAssertTrue(Hints.whyCantMove(red(0), in: game, selectedValueID: nil).contains("only on a 5"))
+    }
+
+    func testTappingTheOtherPlayersHelmetSaysWhoseItIs() {
+        let game = state(values: [(3, .die), (4, .die)])
+        XCTAssertTrue(Hints.whyCantMove(PawnID(color: .yellow, index: 0), in: game, selectedValueID: nil).contains("other player"))
+    }
+
+    func testOvershootingHomeIsExplained() throws {
+        let nearHome = try XCTUnwrap(Board.position(atProgress: Board.homeProgress - 2, for: .red))
+        let game = state(placing: [(red(0), nearHome)], values: [(6, .die), (4, .die)])
+        let reason = Hints.whyCantMove(red(0), in: game, selectedValueID: 0)
+        XCTAssertTrue(reason.contains("overshoot home"))
+    }
+
+    func testLandingOfAnEntryIsTheStartSquare() {
+        let game = state(values: [(5, .die), (2, .die)])
+        XCTAssertEqual(Rules.landing(of: .enter(pawn: red(0), spending: [0]), in: game), redEntry)
     }
 
     func testCaptureBonusIsExplained() throws {

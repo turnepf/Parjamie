@@ -14,6 +14,10 @@ struct GameView: View {
     @State private var homeTick = 0
     @State private var overheatTick = 0
     @State private var winTick = 0
+    @State private var nudge: String?
+    @State private var nudgeTask: Task<Void, Never>?
+    @State private var showHowToPlay = false
+    @AppStorage(HowToPlaySetting.seenKey) private var seenHowToPlay = false
 
     var body: some View {
         if let game = session.game {
@@ -27,6 +31,19 @@ struct GameView: View {
                 .sensoryFeedback(.success, trigger: homeTick)
                 .sensoryFeedback(.warning, trigger: overheatTick)
                 .sensoryFeedback(.success, trigger: winTick)
+                .sheet(isPresented: $showHowToPlay) {
+                    HowToPlayView(
+                        myColors: myColors(game),
+                        isLocal: session.role == .local,
+                        otherName: session.peerName
+                    )
+                }
+                .onAppear {
+                    if !seenHowToPlay {
+                        seenHowToPlay = true
+                        showHowToPlay = true
+                    }
+                }
         }
     }
 
@@ -44,10 +61,28 @@ struct GameView: View {
                 movable: movablePawns(game),
                 selected: nil,
                 effects: effects,
+                guides: guides(game),
+                bayLabels: bayLabels(game),
                 onTap: { tap($0, in: game) }
             )
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
+            .overlay(alignment: .top) {
+                if let nudge {
+                    Text(nudge)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(Capsule().fill(Color.black.opacity(0.82)))
+                        .overlay(Capsule().stroke(Palette.arc.opacity(0.7), lineWidth: 1))
+                        .padding(.horizontal, 24)
+                        .padding(.top, 14)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .onTapGesture { withAnimation { self.nudge = nil } }
+                }
+            }
 
             diceRow(game)
             Spacer(minLength: 8)
@@ -76,22 +111,53 @@ struct GameView: View {
     }
 
     private func header(_ game: GameState) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(turnHeadline(game))
                     .font(.system(size: 20, weight: .semibold, design: .rounded))
                     .foregroundStyle(Palette.ink)
+                identityBadge(game)
                 Text(subhead(game))
                     .font(.system(size: 13, weight: .regular, design: .rounded))
                     .foregroundStyle(Palette.ink.opacity(0.55))
             }
             Spacer()
-            Button("Leave") { session.stop() }
-                .font(.system(size: 15, weight: .medium, design: .rounded))
-                .foregroundStyle(Palette.ink.opacity(0.5))
+            HStack(spacing: 14) {
+                Button {
+                    showHowToPlay = true
+                } label: {
+                    Image(systemName: "questionmark.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundStyle(Palette.felt)
+                }
+                .accessibilityLabel("How to play")
+                Button("Leave") { session.stop() }
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .foregroundStyle(Palette.ink.opacity(0.5))
+            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
+    }
+
+    /// Which color this phone is playing, so nobody has to guess.
+    private func identityBadge(_ game: GameState) -> some View {
+        let colors = myColors(game)
+        let names = colors.map(Palette.name).joined(separator: " & ")
+        return HStack(spacing: 6) {
+            ForEach(colors, id: \.self) { color in
+                HelmetShape(tint: Palette.color(color))
+                    .frame(width: 18, height: 18)
+            }
+            Text(session.role == .local ? "\(names)'s helmets" : "You're \(names)")
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundStyle(Palette.ink)
+        }
+        .padding(.leading, 6)
+        .padding(.trailing, 10)
+        .padding(.vertical, 3)
+        .background(Capsule().fill(Palette.color(colors.first ?? .red).opacity(0.16)))
+        .overlay(Capsule().stroke(Palette.color(colors.first ?? .red).opacity(0.5), lineWidth: 1))
     }
 
     @ViewBuilder
@@ -134,7 +200,8 @@ struct GameView: View {
                 DieFace(value: roll.second).frame(width: 46, height: 46)
             }
 
-            if game.turn.phase == .moving {
+            // The other player's unspent numbers are theirs to pick from, not ours.
+            if game.turn.phase == .moving && session.canAct {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(game.turn.values) { value in
@@ -225,17 +292,27 @@ struct GameView: View {
         if case .lost(let reason) = session.status { return reason }
         if session.status == .reconnecting { return "Reconnecting to \(session.peerName ?? "the other phone")…" }
         if game.winner != nil { return "Tap New game for a rematch" }
-        if game.turn.phase == .awaitingRoll { return session.canAct ? "Strike an arc to roll" : "Waiting for the roll" }
-        if !session.canAct { return "Watching" }
+        if !session.canAct {
+            if let roll = game.turn.roll, game.turn.phase == .moving {
+                return "\(otherName) rolled \(roll.first) and \(roll.second). Nothing for you to do yet."
+            }
+            return "Nothing for you to do yet."
+        }
+        if game.turn.phase == .awaitingRoll { return "Strike an arc to roll" }
         if game.turn.values.isEmpty { return "No moves left" }
-        return selectedValueID == nil ? "Pick a number, then a pawn" : "Tap a pawn to move it"
+        return selectedValueID == nil ? "Pick a number, then a helmet" : "Tap a glowing helmet to move it"
     }
 
     private func rollLabel(_ game: GameState) -> String {
         if game.winner != nil { return "Game over" }
-        if game.turn.phase == .moving { return "Move a pawn" }
-        return session.canAct ? "Strike an arc" : "Waiting"
+        if !session.canAct {
+            return game.turn.phase == .moving ? "\(otherName) is moving…" : "\(otherName) is rolling…"
+        }
+        if game.turn.phase == .moving { return "Move a helmet" }
+        return "Strike an arc"
     }
+
+    private var otherName: String { session.peerName ?? "The other player" }
 
     private func canRoll(_ game: GameState) -> Bool {
         session.canAct && game.turn.phase == .awaitingRoll
@@ -286,14 +363,53 @@ struct GameView: View {
 
     // MARK: Moves
 
+    /// The colors this phone moves: its own seat online, or whoever's turn it is locally.
+    private func myColors(_ game: GameState) -> [PlayerColor] {
+        game.colors(for: session.viewingSeat)
+    }
+
+    private func bayLabels(_ game: GameState) -> [PlayerColor: String] {
+        guard session.role != .local else { return [:] }
+        var labels: [PlayerColor: String] = [:]
+        for color in game.colors(for: session.mySeat) { labels[color] = "YOU" }
+        let other = (session.peerName ?? "Them").uppercased()
+        for color in game.colors(for: session.mySeat.opponent) { labels[color] = other }
+        return labels
+    }
+
+    private func guides(_ game: GameState) -> BoardGuides {
+        guard showHints else { return BoardGuides() }
+        var guides = BoardGuides(showDirection: true)
+        guard session.canAct, game.turn.phase == .moving else { return guides }
+        let moves = availableMoves(game, selecting: selectedValueID ?? (game.turn.values.count == 1 ? game.turn.values.first?.id : nil))
+        guides.startSquares = Array(Set(moves.compactMap { move -> PlayerColor? in
+            if case .enter(let pawn, _) = move { pawn.color } else { nil }
+        }))
+        // Only preview landings once a number is chosen (or there is just one), so the
+        // board stays readable.
+        let chosen = selectedValueID ?? (game.turn.values.count == 1 ? game.turn.values.first?.id : nil)
+        if chosen != nil {
+            var seen = Set<PawnPosition>()
+            guides.landings = moves.compactMap { move in
+                guard let spot = Rules.landing(of: move, in: game), seen.insert(spot).inserted else { return nil }
+                return PawnLanding(pawn: move.pawn, position: spot)
+            }
+        }
+        return guides
+    }
+
     private func viewingColor(_ game: GameState) -> PlayerColor {
         game.colors(for: session.viewingSeat).first ?? .red
     }
 
     private func availableMoves(_ game: GameState) -> [Move] {
+        availableMoves(game, selecting: selectedValueID)
+    }
+
+    private func availableMoves(_ game: GameState, selecting valueID: Int?) -> [Move] {
         let moves = Rules.legalMoves(in: game)
-        guard let selectedValueID else { return moves }
-        return moves.filter { $0.spentValueIDs.contains(selectedValueID) }
+        guard let valueID else { return moves }
+        return moves.filter { $0.spentValueIDs.contains(valueID) }
     }
 
     private func movablePawns(_ game: GameState) -> Set<PawnID> {
@@ -302,8 +418,27 @@ struct GameView: View {
     }
 
     private func tap(_ pawn: PawnID, in game: GameState) {
-        guard session.canAct, let move = availableMoves(game).first(where: { $0.pawn == pawn }) else { return }
+        guard session.canAct else {
+            if game.winner == nil { show("It's \(session.peerName ?? "the other player")'s turn.") }
+            return
+        }
+        guard let move = availableMoves(game).first(where: { $0.pawn == pawn }) else {
+            show(Hints.whyCantMove(pawn, in: game, selectedValueID: selectedValueID))
+            return
+        }
         session.perform(move)
         selectedValueID = nil
+        withAnimation { nudge = nil }
+    }
+
+    /// A short explanation over the board when a tap did nothing.
+    private func show(_ message: String) {
+        nudgeTask?.cancel()
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { nudge = message }
+        nudgeTask = Task {
+            try? await Task.sleep(for: .seconds(3.5))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeOut(duration: 0.25)) { nudge = nil }
+        }
     }
 }

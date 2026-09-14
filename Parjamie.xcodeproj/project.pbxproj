@@ -11,6 +11,7 @@
 		24E50124C1125D40DF3C5CF2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714737E2AB25950DC0148D34 /* Theme.swift */; };
 		2FE860A20336048E1381E7B9 /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0680F4462C09C0C893DF8E7E /* LobbyView.swift */; };
 		5B8904DB469E10A84D02D490 /* burst.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCD49919B5DF3A818A222D8F /* burst.wav */; };
+		6614DF17081FAE48273DDF37 /* HowToPlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A287F7A09DFEC151585376D /* HowToPlayView.swift */; };
 		9919E43141608E278FA74DD3 /* sizzle.wav in Resources */ = {isa = PBXBuildFile; fileRef = 40C69D377EE45388C255A27C /* sizzle.wav */; };
 		9FE8A51EAC9666B9A104044C /* ParjamieNet in Frameworks */ = {isa = PBXBuildFile; productRef = 1E417820269079549451F213 /* ParjamieNet */; };
 		ACE5AE3B5A9DFD5035F29F57 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A365AC16B0682B4AD40B7E47 /* GameView.swift */; };
@@ -28,6 +29,7 @@
 		0680F4462C09C0C893DF8E7E /* LobbyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyView.swift; sourceTree = "<group>"; };
 		40C69D377EE45388C255A27C /* sizzle.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sizzle.wav; sourceTree = "<group>"; };
 		714737E2AB25950DC0148D34 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		7A287F7A09DFEC151585376D /* HowToPlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowToPlayView.swift; sourceTree = "<group>"; };
 		913EA0CEF272E54E665F762C /* Parjamie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Parjamie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2E9201B94A672D43A21CCC6 /* Effects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Effects.swift; sourceTree = "<group>"; };
 		A365AC16B0682B4AD40B7E47 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
@@ -68,6 +70,7 @@
 				03FE5289B5D6ED2B1B6ED31C /* DiceView.swift */,
 				A2E9201B94A672D43A21CCC6 /* Effects.swift */,
 				A365AC16B0682B4AD40B7E47 /* GameView.swift */,
+				7A287F7A09DFEC151585376D /* HowToPlayView.swift */,
 				0680F4462C09C0C893DF8E7E /* LobbyView.swift */,
 				E79AE7381721BA0886CF7E59 /* ParjamieApp.swift */,
 				714737E2AB25950DC0148D34 /* Theme.swift */,
@@ -202,6 +205,7 @@
 				BB6E7C5559C2808D45F61512 /* DiceView.swift in Sources */,
 				C6271452B1562B125935C073 /* Effects.swift in Sources */,
 				ACE5AE3B5A9DFD5035F29F57 /* GameView.swift in Sources */,
+				6614DF17081FAE48273DDF37 /* HowToPlayView.swift in Sources */,
 				2FE860A20336048E1381E7B9 /* LobbyView.swift in Sources */,
 				DA4295D9BF3C04338EA359F9 /* ParjamieApp.swift in Sources */,
 				24E50124C1125D40DF3C5CF2 /* Theme.swift in Sources */,

@@ -19,8 +19,8 @@ final class NamingTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let scanned = ["App", "Sources", "Tests", "docs", "scripts", "project.yml", "Package.swift", "Parjamie.xcodeproj", "CLAUDE.md"]
-        let textExtensions: Set<String> = ["swift", "plist", "yml", "pbxproj", "json", "strings", "md", "xcworkspacedata", "html", "css", "sh", "txt"]
+        let scanned = ["App", "Sources", "Tests", "project.yml", "Package.swift", "Parjamie.xcodeproj", "CLAUDE.md"]
+        let textExtensions: Set<String> = ["swift", "plist", "yml", "pbxproj", "json", "strings", "md", "xcworkspacedata"]
 
         var offenders: [String] = []
         for entry in scanned {

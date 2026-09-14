@@ -88,6 +88,18 @@ public enum Rules {
         return moves
     }
 
+    /// Where a move would leave its pawn, or nil when the move does not apply.
+    public static func landing(of move: Move, in state: GameState) -> PawnPosition? {
+        switch move {
+        case .enter(let pawn, _):
+            return .ring(Board.entryIndex(for: pawn.color))
+        case .advance(let id, let valueID):
+            guard let pawn = state[id],
+                  let value = state.turn.values.first(where: { $0.id == valueID }) else { return nil }
+            return destination(for: pawn, advancing: value.amount, in: state)
+        }
+    }
+
     /// Where a pawn lands, or nil when the move is illegal.
     public static func destination(for pawn: Pawn, advancing amount: Int, in state: GameState) -> PawnPosition? {
         guard let from = pawn.progress, amount > 0 else { return nil }

@@ -9,6 +9,7 @@ struct LobbyView: View {
     @AppStorage(HintSetting.key) private var showHints = true
     @AppStorage(SoundSetting.key) private var playSounds = true
     @FocusState private var nameFocused: Bool
+    @State private var showHowToPlay = false
 
     private var trimmedName: String {
         playerName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -39,6 +40,7 @@ struct LobbyView: View {
         .background { ShopBackdrop().ignoresSafeArea() }
         .preferredColorScheme(.dark)
         .animation(.easeInOut(duration: 0.2), value: session.discovered)
+        .sheet(isPresented: $showHowToPlay) { HowToPlayView() }
     }
 
     private var title: some View {
@@ -119,10 +121,17 @@ struct LobbyView: View {
                 }
                 .disabled(trimmedName.isEmpty)
                 .opacity(trimmedName.isEmpty ? 0.4 : 1)
-                Button("Both of us on this phone") { session.startLocalGame(setup: setup) }
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.55))
-                    .padding(.top, 2)
+                HStack(spacing: 22) {
+                    Button("Both of us on this phone") { session.startLocalGame(setup: setup) }
+                    Button {
+                        showHowToPlay = true
+                    } label: {
+                        Label("How to play", systemImage: "questionmark.circle")
+                    }
+                }
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.6))
+                .padding(.top, 2)
             }
         }
     }
