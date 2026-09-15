@@ -241,6 +241,11 @@ public final class MatchSession {
         status = .idle
     }
 
+    #if DEBUG
+    /// Loads a staged position for App Store screenshots. Debug builds only.
+    public func debugLoad(_ state: GameState) { game = state }
+    #endif
+
     // MARK: Player actions
 
     public func roll() {

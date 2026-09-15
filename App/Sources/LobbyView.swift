@@ -43,6 +43,16 @@ struct LobbyView: View {
         .sheet(isPresented: $showHowToPlay) { HowToPlayView() }
         .sheet(isPresented: $showScoreboard) { ScoreboardView() }
         .sheet(isPresented: $showHouseRules) { HouseRulesView(rules: houseRules) }
+        .onAppear {
+            #if DEBUG
+            switch ScreenshotScene.current {
+            case "-shotScores": showScoreboard = true
+            case "-shotRules": showHouseRules = true
+            case "-shotGuide": showHowToPlay = true
+            default: break
+            }
+            #endif
+        }
         .sheet(isPresented: $showComputer) {
             ComputerSetupView(playerName: $playerName) { level in
                 showComputer = false

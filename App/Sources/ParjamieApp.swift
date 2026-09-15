@@ -56,6 +56,7 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var typeSize
     @AppStorage(WelcomeTourSetting.key) private var seenWelcomeTour = false
+    @Environment(ScoreboardStore.self) private var shotStore
 
     var body: some View {
         ZStack {
@@ -75,6 +76,11 @@ struct RootView: View {
             WelcomeTourView { seenWelcomeTour = true }
         }
         .onAppear(perform: limitMacWindowSize)
+        .task {
+            #if DEBUG
+            await ScreenshotScene.run(session: session, store: shotStore)
+            #endif
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { session.appBecameActive() }
         }

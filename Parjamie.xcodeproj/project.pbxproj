@@ -10,6 +10,7 @@
 		08313682ACDF6C6EBE4317CD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFA08B581A3B4DAF8F11C566 /* Assets.xcassets */; };
 		24E50124C1125D40DF3C5CF2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714737E2AB25950DC0148D34 /* Theme.swift */; };
 		2FE860A20336048E1381E7B9 /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0680F4462C09C0C893DF8E7E /* LobbyView.swift */; };
+		461EC48C8B3B6BE5B3A437A8 /* ScreenshotScenes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7926FECB7176D763D24608D /* ScreenshotScenes.swift */; };
 		54432D21D819F0693B0455D9 /* ScoreboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 248CD3E3733B4AECE6595852 /* ScoreboardStore.swift */; };
 		5B8904DB469E10A84D02D490 /* burst.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCD49919B5DF3A818A222D8F /* burst.wav */; };
 		6614DF17081FAE48273DDF37 /* HowToPlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A287F7A09DFEC151585376D /* HowToPlayView.swift */; };
@@ -45,6 +46,7 @@
 		DA1C2C5DA750D8A27B05AA84 /* arc.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = arc.wav; sourceTree = "<group>"; };
 		E79AE7381721BA0886CF7E59 /* ParjamieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParjamieApp.swift; sourceTree = "<group>"; };
 		EFA08B581A3B4DAF8F11C566 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F7926FECB7176D763D24608D /* ScreenshotScenes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotScenes.swift; sourceTree = "<group>"; };
 		FCD49919B5DF3A818A222D8F /* burst.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = burst.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,6 +86,7 @@
 				E79AE7381721BA0886CF7E59 /* ParjamieApp.swift */,
 				248CD3E3733B4AECE6595852 /* ScoreboardStore.swift */,
 				954E664680AE9A706D9EAE26 /* ScoreboardView.swift */,
+				F7926FECB7176D763D24608D /* ScreenshotScenes.swift */,
 				714737E2AB25950DC0148D34 /* Theme.swift */,
 				AB6436C86FDC2D6C485A6A57 /* WelcomeTourView.swift */,
 			);
@@ -223,6 +226,7 @@
 				DA4295D9BF3C04338EA359F9 /* ParjamieApp.swift in Sources */,
 				54432D21D819F0693B0455D9 /* ScoreboardStore.swift in Sources */,
 				BAF7697AECC6172A9650C9F6 /* ScoreboardView.swift in Sources */,
+				461EC48C8B3B6BE5B3A437A8 /* ScreenshotScenes.swift in Sources */,
 				24E50124C1125D40DF3C5CF2 /* Theme.swift in Sources */,
 				B213978FEDAAE7DE47259B07 /* WelcomeTourView.swift in Sources */,
 			);
