@@ -16,6 +16,7 @@ struct LobbyView: View {
     @AppStorage(SecondPlayerName.key) private var secondName = ""
     @AppStorage(HouseRulesSetting.key) private var houseRulesRaw = ""
     @State private var showHouseRules = false
+    @Environment(ScoreboardStore.self) private var scoreboardStore
 
     private var houseRules: Binding<HouseRules> {
         Binding(
@@ -41,7 +42,8 @@ struct LobbyView: View {
         .preferredColorScheme(.dark)
         .animation(.easeInOut(duration: 0.2), value: session.discovered)
         .sheet(isPresented: $showHowToPlay) { HowToPlayView() }
-        .sheet(isPresented: $showScoreboard) { ScoreboardView() }
+        // Sheets on the Mac don't inherit observable environment objects, so pass the store along.
+        .sheet(isPresented: $showScoreboard) { ScoreboardView().environment(scoreboardStore) }
         .sheet(isPresented: $showHouseRules) { HouseRulesView(rules: houseRules) }
         .onAppear {
             #if DEBUG

@@ -47,6 +47,7 @@ struct GameView: View {
                 }
                 .sheet(isPresented: $showScoreboard) {
                     ScoreboardView(highlight: [playerName(of: .one, in: game), playerName(of: .two, in: game)])
+                        .environment(scoreboardStore)
                 }
                 .onAppear {
                     if !seenHowToPlay {

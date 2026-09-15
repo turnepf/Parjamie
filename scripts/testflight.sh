@@ -1,5 +1,5 @@
 #!/bin/bash
-# Uploads a new build of Parjamie to TestFlight for internal testing.
+# Uploads a new build of Parjamie (iPhone, iPad and Mac) to TestFlight for internal testing.
 #
 # Bumps the build number in project.yml, regenerates the Xcode project, archives a
 # Release build, and uploads it. Builds reach the Family group automatically once
@@ -18,16 +18,21 @@ echo "Building Parjamie build $next"
 
 work=$(mktemp -d)
 swift test
-xcodebuild archive \
-  -project Parjamie.xcodeproj -scheme Parjamie -configuration Release \
-  -destination 'generic/platform=iOS' \
-  -archivePath "$work/Parjamie.xcarchive" -derivedDataPath "$work/DerivedData" \
-  -allowProvisioningUpdates
-xcodebuild -exportArchive \
-  -archivePath "$work/Parjamie.xcarchive" \
-  -exportOptionsPlist scripts/ExportOptions.plist \
-  -exportPath "$work/export" \
-  -allowProvisioningUpdates
+# One bundle ID covers iPhone, iPad and Mac, so both uploads land on the same App Store
+# Connect app (universal purchase).
+for platform in iOS "macOS,variant=Mac Catalyst"; do
+  name=${platform%%,*}
+  xcodebuild archive \
+    -project Parjamie.xcodeproj -scheme Parjamie -configuration Release \
+    -destination "generic/platform=$platform" \
+    -archivePath "$work/Parjamie-$name.xcarchive" -derivedDataPath "$work/DerivedData" \
+    -allowProvisioningUpdates
+  xcodebuild -exportArchive \
+    -archivePath "$work/Parjamie-$name.xcarchive" \
+    -exportOptionsPlist scripts/ExportOptions.plist \
+    -exportPath "$work/export-$name" \
+    -allowProvisioningUpdates
+done
 
 echo "Uploaded build $next. Commit project.yml and Parjamie.xcodeproj to record the new build number."
-echo "To show the app icon on the App Store Connect home page, attach this build on the iOS 1.0 version page and Save. Never tap Add for Review."
+echo "To show the app icon on the App Store Connect home page, attach this build on the iOS 1.0 and macOS 1.0 version pages and Save. Never tap Add for Review."
