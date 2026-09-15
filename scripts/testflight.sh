@@ -3,7 +3,9 @@
 #
 # Bumps the build number in project.yml, regenerates the Xcode project, archives a
 # Release build, and uploads it. Builds reach the Family group automatically once
-# Apple finishes processing, with no review. Needs Xcode signed in to the team's
+# Apple finishes processing, with no review. Builds are not locked to internal testing,
+# so one can be attached to the App Store version page (that is what makes the icon
+# show in App Store Connect). Attaching is harmless; only Add for Review submits. Needs Xcode signed in to the team's
 # Apple account (Xcode > Settings > Accounts).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -28,3 +30,4 @@ xcodebuild -exportArchive \
   -allowProvisioningUpdates
 
 echo "Uploaded build $next. Commit project.yml and Parjamie.xcodeproj to record the new build number."
+echo "To show the app icon on the App Store Connect home page, attach this build on the iOS 1.0 version page and Save. Never tap Add for Review."
