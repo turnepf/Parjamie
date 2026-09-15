@@ -27,9 +27,11 @@ struct BoardView: View {
                     draw(in: &context, unit: unit)
                 }
                 .frame(width: side, height: side)
+                .accessibilityHidden(true)
 
                 guideLayer(unit: unit)
                     .allowsHitTesting(false)
+                    .accessibilityHidden(true)
 
                 ForEach(PlayerColor.allCases.filter { bayLabels[$0] != nil }, id: \.self) { color in
                     Text(bayLabels[color] ?? "")
@@ -42,6 +44,7 @@ struct BoardView: View {
                         .rotationEffect(.degrees(-quarterTurns * 90))
                         .position(point(for: nil, at: .nest, color: color, unit: unit))
                         .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                 }
 
                 ForEach(game.pawns) { pawn in
@@ -55,12 +58,18 @@ struct BoardView: View {
                     .frame(width: unit * 1.5, height: unit * 1.5)
                     .position(point(for: pawn.id, at: pawn.position, unit: unit))
                     .onTapGesture { onTap(pawn.id) }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(spokenDescription(of: pawn))
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilityHint(movable.contains(pawn.id) ? "Can move. Double tap to move it." : "")
+                    .accessibilityAction { onTap(pawn.id) }
                     .zIndex(selected == pawn.id ? 2 : 1)
                 }
 
                 blockadeWelds(unit: unit)
                     .zIndex(3)
                     .allowsHitTesting(false)
+                    .accessibilityHidden(true)
 
                 ForEach(guides.landings, id: \.self) { landing in
                     LandingMarker(color: landing.pawn.color)
@@ -69,6 +78,7 @@ struct BoardView: View {
                         .position(point(for: nil, at: landing.position, color: landing.pawn.color, unit: unit))
                         .zIndex(2.5)
                         .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                 }
 
                 ForEach(effects) { effect in
@@ -77,6 +87,7 @@ struct BoardView: View {
                         .position(point(for: nil, at: effect.position, color: effect.color, unit: unit))
                         .zIndex(4)
                         .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                 }
             }
             .frame(width: side, height: side)
@@ -453,6 +464,24 @@ struct BoardView: View {
 
     // MARK: Placement
 
+    /// What VoiceOver reads for a pawn, such as "Red helmet, 12 squares along, on a safe square".
+    private func spokenDescription(of pawn: Pawn) -> String {
+        let name = "\(Palette.name(pawn.color)) helmet"
+        switch pawn.position {
+        case .nest:
+            return "\(name), waiting in its bay"
+        case .ring:
+            let along = pawn.progress ?? 0
+            let place = along == 0 ? "on its start square" : "\(along) \(along == 1 ? "square" : "squares") along"
+            return "\(name), \(place)\(isOnSafeSquare(pawn) ? ", on a safe square" : "")"
+        case .homeColumn(let step):
+            let left = Board.homeColumnLength - step
+            return "\(name), in its home row, \(left) \(left == 1 ? "square" : "squares") from home"
+        case .home:
+            return "\(name), home"
+        }
+    }
+
     private func isOnSafeSquare(_ pawn: Pawn) -> Bool {
         if case .ring(let index) = pawn.position { return game.isSafe(ring: index) }
         return false
@@ -591,6 +620,10 @@ struct HelmetShape: View {
     var lensLit: Bool = false
 
     var body: some View {
+        drawing.accessibilityHidden(true)
+    }
+
+    private var drawing: some View {
         Canvas { context, size in
             let w = min(size.width, size.height)
             let ox = (size.width - w) / 2

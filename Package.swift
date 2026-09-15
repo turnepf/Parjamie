@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "Parjamie",
-    platforms: [.iOS(.v17), .macOS(.v14)],
+    platforms: [.iOS(.v17), .macCatalyst(.v17), .macOS(.v14)],
     products: [
         .library(name: "ParjamieEngine", targets: ["ParjamieEngine"]),
         .library(name: "ParjamieNet", targets: ["ParjamieNet"])

@@ -52,6 +52,7 @@ struct EffectView: View {
             }
         }
         .frame(width: unit * 8, height: unit * 8)
+        .accessibilityHidden(true)
     }
 
     private func drawSparks(in context: inout GraphicsContext, center c: CGPoint, t: Double) {
@@ -130,12 +131,12 @@ struct OverheatedBanner: View {
     var body: some View {
         VStack(spacing: 4) {
             Text("OVERHEATED!")
-                .font(.system(size: 30, weight: .black, design: .rounded))
+                .font(.rounded(30, .black))
                 .tracking(2)
                 .foregroundStyle(.linearGradient(colors: [.white, Color(red: 1, green: 0.75, blue: 0.3)], startPoint: .top, endPoint: .bottom))
                 .shadow(color: Color(red: 1, green: 0.25, blue: 0.05), radius: 12)
             Text("Three doubles. Your farthest pawn cools off in the nest.")
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(.rounded(13, .semibold))
                 .foregroundStyle(.white.opacity(0.9))
                 .multilineTextAlignment(.center)
         }
@@ -157,20 +158,20 @@ struct CertifiedPlate: View {
     var body: some View {
         VStack(spacing: 14) {
             Text(isMine ? "CERTIFIED WELDER" : "WELL PLAYED")
-                .font(.system(size: 15, weight: .heavy, design: .monospaced))
+                .font(.mono(15, .heavy))
                 .tracking(3)
                 .foregroundStyle(Palette.ink.opacity(0.7))
             Text(winnerName)
-                .font(.system(size: 34, weight: .black, design: .rounded))
+                .font(.rounded(34, .black))
                 .foregroundStyle(Palette.ink)
                 .shadow(color: .white.opacity(0.6), radius: 0, x: 0, y: 1)
             if !isMine {
                 Text("is a certified welder")
-                    .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                    .font(.mono(14, .semibold))
                     .foregroundStyle(Palette.ink.opacity(0.6))
             }
             Text("BEAD QUALITY: FLAWLESS · PASS")
-                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .font(.mono(11, .bold))
                 .tracking(1)
                 .foregroundStyle(Palette.color(.red).opacity(0.85))
                 .padding(.horizontal, 10)
@@ -179,14 +180,14 @@ struct CertifiedPlate: View {
                 .rotationEffect(.degrees(-4))
             if let tally {
                 Text(tally)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .font(.rounded(15, .bold))
                     .foregroundStyle(Palette.ink.opacity(0.75))
             }
             HStack(spacing: 10) {
                 if let onScoreboard {
                     Button(action: onScoreboard) {
                         Label("Scoreboard", systemImage: "list.number")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .font(.rounded(16, .semibold))
                             .lineLimit(1)
                             .fixedSize()
                             .foregroundStyle(Palette.felt)
@@ -198,7 +199,7 @@ struct CertifiedPlate: View {
                 }
                 Button(action: onNewGame) {
                     Text("New game")
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .font(.rounded(17, .semibold))
                         .lineLimit(1)
                         .fixedSize()
                         .foregroundStyle(Palette.parchment)

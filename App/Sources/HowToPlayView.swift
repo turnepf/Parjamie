@@ -24,7 +24,7 @@ struct HowToPlayView: View {
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
                     Text("HOW TO PLAY")
-                        .font(.system(size: 26, weight: .black, design: .rounded))
+                        .font(.rounded(26, .black))
                         .tracking(2)
                         .foregroundStyle(.white)
                     Spacer()
@@ -45,7 +45,7 @@ struct HowToPlayView: View {
                             }
                             VStack(alignment: .leading, spacing: 3) {
                                 Text("You're \(colorNames)")
-                                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                    .font(.rounded(20, .heavy))
                                     .foregroundStyle(Palette.color(myColors[0]))
                                 Text("Your helmets start in the bay marked YOU. \(otherName ?? "The other player")'s bay has their name on it.")
                                     .modifier(GuideText())
@@ -112,7 +112,7 @@ struct HowToPlayView: View {
 
                 Button { dismiss() } label: {
                     Text("Got it")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .font(.rounded(18, .bold))
                         .frame(maxWidth: .infinity, minHeight: 54)
                         .background(
                             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -137,7 +137,7 @@ struct HowToPlayView: View {
         VStack(alignment: .leading, spacing: 10) {
             if let title {
                 Text(title.uppercased())
-                    .font(.system(size: 13, weight: .bold, design: .monospaced))
+                    .font(.mono(13, .bold))
                     .tracking(2)
                     .foregroundStyle(Palette.arc)
             }
@@ -151,7 +151,7 @@ struct HowToPlayView: View {
     private func step(_ number: Int, _ text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Text("\(number)")
-                .font(.system(size: 13, weight: .black, design: .rounded))
+                .font(.rounded(13, .black))
                 .foregroundStyle(Palette.ink)
                 .frame(width: 22, height: 22)
                 .background(Circle().fill(Palette.arc))
@@ -165,7 +165,7 @@ struct HowToPlayView: View {
                 .frame(width: 56, height: 56)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .font(.rounded(15, .bold))
                     .foregroundStyle(.white)
                 Text(text).modifier(GuideText())
             }
@@ -175,7 +175,7 @@ struct HowToPlayView: View {
     private struct GuideText: ViewModifier {
         func body(content: Content) -> some View {
             content
-                .font(.system(size: 14, design: .rounded))
+                .font(.rounded(14))
                 .foregroundStyle(.white.opacity(0.78))
                 .fixedSize(horizontal: false, vertical: true)
         }

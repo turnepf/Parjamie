@@ -12,6 +12,7 @@ struct LobbyView: View {
     @State private var showHowToPlay = false
     @State private var showScoreboard = false
     @State private var showOnePhone = false
+    @State private var showComputer = false
     @AppStorage(SecondPlayerName.key) private var secondName = ""
     @AppStorage(HouseRulesSetting.key) private var houseRulesRaw = ""
     @State private var showHouseRules = false
@@ -42,6 +43,14 @@ struct LobbyView: View {
         .sheet(isPresented: $showHowToPlay) { HowToPlayView() }
         .sheet(isPresented: $showScoreboard) { ScoreboardView() }
         .sheet(isPresented: $showHouseRules) { HouseRulesView(rules: houseRules) }
+        .sheet(isPresented: $showComputer) {
+            ComputerSetupView(playerName: $playerName) { level in
+                showComputer = false
+                session.startComputerGame(setup: setup, playerName: trimmedName.isEmpty ? "You" : trimmedName,
+                                          level: level, rules: houseRules.wrappedValue)
+            }
+            .presentationDetents([.medium, .large])
+        }
         .sheet(isPresented: $showOnePhone) {
             OnePhoneSetupView(firstName: $playerName, secondName: $secondName, setup: setup) { names in
                 showOnePhone = false
@@ -74,6 +83,9 @@ struct LobbyView: View {
             Spacer(minLength: 16)
         }
         .padding(.horizontal, 24)
+        // Keep the controls a comfortable width on iPad and Mac.
+        .frame(maxWidth: 520)
+        .frame(maxWidth: .infinity)
     }
 
     private var title: some View {
@@ -89,14 +101,14 @@ struct LobbyView: View {
             }
             .frame(height: 64)
             Text("PARJAMIE")
-                .font(.system(size: 38, weight: .black, design: .rounded))
+                .font(.rounded(38, .black))
                 .tracking(3)
                 .foregroundStyle(.linearGradient(colors: [Color(white: 0.97), Color(white: 0.7)], startPoint: .top, endPoint: .bottom))
                 .shadow(color: .black.opacity(0.6), radius: 0, y: 2)
             WeldBead()
                 .frame(width: 180, height: 7)
             Text("The race home, for two")
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(.rounded(14, .semibold))
                 .tracking(1.5)
                 .foregroundStyle(Palette.arc)
                 .padding(.top, 2)
@@ -110,7 +122,7 @@ struct LobbyView: View {
             VStack(alignment: .leading, spacing: 8) {
                 sectionLabel("Your name")
                 TextField("", text: $playerName, prompt: Text("So the other player knows it's you").foregroundStyle(.white.opacity(0.35)))
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .font(.rounded(17, .semibold))
                     .foregroundStyle(.white)
                     .tint(Palette.arc)
                     .textContentType(.givenName)
@@ -156,8 +168,13 @@ struct LobbyView: View {
                 }
                 .disabled(trimmedName.isEmpty)
                 .opacity(trimmedName.isEmpty ? 0.4 : 1)
-                secondary("Play together on this phone", systemImage: "iphone") {
-                    showOnePhone = true
+                HStack(spacing: 12) {
+                    secondary("Together", systemImage: "iphone") {
+                        showOnePhone = true
+                    }
+                    secondary("Vs computer", systemImage: "cpu") {
+                        showComputer = true
+                    }
                 }
                 HStack(spacing: 26) {
                     Button {
@@ -171,7 +188,7 @@ struct LobbyView: View {
                         Label("How to play", systemImage: "questionmark.circle")
                     }
                 }
-                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .font(.rounded(15, .medium))
                 .foregroundStyle(.white.opacity(0.6))
                 .padding(.top, 2)
             }
@@ -190,10 +207,10 @@ struct LobbyView: View {
                     .frame(width: 34)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("House rules")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .font(.rounded(16, .semibold))
                         .foregroundStyle(.white)
                     Text(changed == 0 ? "Classic rules" : "\(changed) \(changed == 1 ? "rule" : "rules") changed")
-                        .font(.system(size: 12, design: .rounded))
+                        .font(.rounded(12))
                         .foregroundStyle(changed == 0 ? .white.opacity(0.55) : Palette.arc)
                 }
                 Spacer(minLength: 0)
@@ -209,7 +226,7 @@ struct LobbyView: View {
 
     private func sectionLabel(_ text: String) -> some View {
         Text(text.uppercased())
-            .font(.system(size: 12, weight: .bold, design: .monospaced))
+            .font(.mono(12, .bold))
             .tracking(2)
             .foregroundStyle(.white.opacity(0.5))
             .padding(.leading, 2)
@@ -219,10 +236,10 @@ struct LobbyView: View {
         Toggle(isOn: isOn) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .font(.rounded(16, .semibold))
                     .foregroundStyle(.white)
                 Text(detail)
-                    .font(.system(size: 12, design: .rounded))
+                    .font(.rounded(12))
                     .foregroundStyle(.white.opacity(0.5))
             }
         }
@@ -246,10 +263,10 @@ struct LobbyView: View {
                     .shadow(color: chosen ? Palette.arc.opacity(0.8) : .clear, radius: 6)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(option.title)
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .font(.rounded(16, .semibold))
                         .foregroundStyle(.white)
                     Text(option.detail)
-                        .font(.system(size: 12, design: .rounded))
+                        .font(.rounded(12))
                         .foregroundStyle(.white.opacity(0.55))
                 }
                 Spacer(minLength: 0)
@@ -267,10 +284,10 @@ struct LobbyView: View {
         VStack(spacing: 18) {
             ProgressView().controlSize(.large).tint(Palette.arc)
             Text("Waiting for the other phone")
-                .font(.system(size: 19, weight: .semibold, design: .rounded))
+                .font(.rounded(19, .semibold))
                 .foregroundStyle(.white)
             Text("On the other device, tap Join a game and pick \(session.displayName).")
-                .font(.system(size: 14, design: .rounded))
+                .font(.rounded(14))
                 .foregroundStyle(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
             cancel
@@ -284,10 +301,10 @@ struct LobbyView: View {
             if session.discovered.isEmpty {
                 ProgressView().controlSize(.large).tint(Palette.arc)
                 Text("Looking for a game nearby")
-                    .font(.system(size: 19, weight: .semibold, design: .rounded))
+                    .font(.rounded(19, .semibold))
                     .foregroundStyle(.white)
                 Text("Both phones need to be on the same Wi-Fi, and the other one has to be hosting.")
-                    .font(.system(size: 14, design: .rounded))
+                    .font(.rounded(14))
                     .foregroundStyle(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
             } else {
@@ -298,7 +315,7 @@ struct LobbyView: View {
                             HelmetShape(tint: Palette.color(.yellow), lensLit: true)
                                 .frame(width: 26, height: 26)
                             Text(peer.name)
-                                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                .font(.rounded(17, .semibold))
                                 .foregroundStyle(.white)
                             Spacer()
                             Image(systemName: "chevron.right")
@@ -320,7 +337,7 @@ struct LobbyView: View {
                 .font(.system(size: 36))
                 .foregroundStyle(Palette.arc)
             Text(reason)
-                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .font(.rounded(16, .medium))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
             primary("Start over") { session.stop() }
@@ -331,7 +348,7 @@ struct LobbyView: View {
 
     private var cancel: some View {
         Button("Cancel") { session.stop() }
-            .font(.system(size: 15, weight: .medium, design: .rounded))
+            .font(.rounded(15, .medium))
             .foregroundStyle(.white.opacity(0.55))
             .padding(.top, 6)
     }
@@ -342,7 +359,7 @@ struct LobbyView: View {
     private func primary(_ label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(.rounded(18, .bold))
                 .frame(maxWidth: .infinity, minHeight: 54)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -362,7 +379,7 @@ struct LobbyView: View {
                 if let systemImage { Image(systemName: systemImage) }
                 Text(label)
             }
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(.rounded(18, .semibold))
                 .frame(maxWidth: .infinity, minHeight: 54)
                 .foregroundStyle(.white)
                 .steelPlate()
@@ -454,11 +471,11 @@ struct OnePhoneSetupView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("PLAY ON ONE PHONE")
-                .font(.system(size: 20, weight: .black, design: .rounded))
+                .font(.rounded(20, .black))
                 .tracking(2)
                 .foregroundStyle(.white)
             Text("Take turns passing the phone. The board turns to face whoever is up.")
-                .font(.system(size: 14, design: .rounded))
+                .font(.rounded(14))
                 .foregroundStyle(.white.opacity(0.65))
             playerField("First player", tint: Palette.color(setup.colors(for: .one)[0]), text: $firstName)
             playerField("Second player", tint: Palette.color(setup.colors(for: .two)[0]), text: $secondName)
@@ -466,7 +483,7 @@ struct OnePhoneSetupView: View {
                 onStart(names)
             } label: {
                 Text("Start")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .font(.rounded(18, .bold))
                     .frame(maxWidth: .infinity, minHeight: 54)
                     .background(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -490,7 +507,7 @@ struct OnePhoneSetupView: View {
             HelmetShape(tint: tint, lensLit: true)
                 .frame(width: 34, height: 34)
             TextField("", text: text, prompt: Text(label).foregroundStyle(.white.opacity(0.35)))
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(.rounded(17, .semibold))
                 .foregroundStyle(.white)
                 .tint(Palette.arc)
                 .textInputAutocapitalization(.words)
@@ -499,5 +516,85 @@ struct OnePhoneSetupView: View {
                 .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(.black.opacity(0.4)))
                 .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(.white.opacity(0.14), lineWidth: 1))
         }
+    }
+}
+
+/// Choose a computer opponent to play on this phone.
+struct ComputerSetupView: View {
+    @Binding var playerName: String
+    let onStart: (ComputerPlayer.Level) -> Void
+    @State private var level: ComputerPlayer.Level = .easy
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("PLAY THE COMPUTER")
+                    .font(.rounded(20, .black))
+                    .tracking(2)
+                    .foregroundStyle(.white)
+                Text("You play Red and go first. The computer takes its turns on its own.")
+                    .font(.rounded(14))
+                    .foregroundStyle(.white.opacity(0.65))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                TextField("", text: $playerName, prompt: Text("Your name").foregroundStyle(.white.opacity(0.35)))
+                    .font(.rounded(17, .semibold))
+                    .foregroundStyle(.white)
+                    .tint(Palette.arc)
+                    .textInputAutocapitalization(.words)
+                    .autocorrectionDisabled()
+                    .padding(12)
+                    .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(.black.opacity(0.4)))
+                    .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(.white.opacity(0.14), lineWidth: 1))
+
+                opponent(.easy, name: "Sparky", detail: "Still learning. Makes plenty of friendly moves.")
+                opponent(.hard, name: "Torch", detail: "A seasoned pro. Captures, blocks and plays it safe.")
+
+                Button {
+                    onStart(level)
+                } label: {
+                    Text("Start")
+                        .font(.rounded(18, .bold))
+                        .frame(maxWidth: .infinity, minHeight: 54)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(.linearGradient(colors: [Color(red: 1, green: 0.72, blue: 0.3), Palette.arc, Color(red: 0.85, green: 0.38, blue: 0.05)],
+                                                      startPoint: .top, endPoint: .bottom))
+                        )
+                        .foregroundStyle(Palette.ink)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(24)
+        }
+        .background { ShopBackdrop().ignoresSafeArea() }
+        .preferredColorScheme(.dark)
+    }
+
+    private func opponent(_ option: ComputerPlayer.Level, name: String, detail: String) -> some View {
+        let chosen = level == option
+        return Button {
+            level = option
+        } label: {
+            HStack(spacing: 14) {
+                HelmetShape(tint: Palette.color(.yellow), lensLit: chosen)
+                    .frame(width: 40, height: 40)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(name) · \(option == .easy ? "Easy" : "Hard")")
+                        .font(.rounded(17, .semibold))
+                        .foregroundStyle(.white)
+                    Text(detail)
+                        .font(.rounded(13))
+                        .foregroundStyle(.white.opacity(0.6))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(14)
+            .steelPlate(highlighted: chosen)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(chosen ? .isSelected : [])
     }
 }

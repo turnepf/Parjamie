@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import ParjamieEngine
 
 /// A welding shop: steel plate, weld beads, painted floor markings and the orange of
@@ -58,5 +59,35 @@ extension PawnSetup {
         case .oneColorEach: "Four pawns apiece. A quicker game."
         case .twoColorsEach: "Eight pawns apiece. The longer, tactical game."
         }
+    }
+}
+
+// MARK: - Type
+
+extension Font {
+    /// Rounded system text that grows with the player's text size setting, capped so the
+    /// largest accessibility sizes do not push the board off screen.
+    @MainActor
+    static func rounded(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
+        .system(size: TextScale.scaled(size), weight: weight, design: .rounded)
+    }
+
+    /// Monospaced labels, such as section headings and the certification stamp.
+    @MainActor
+    static func mono(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
+        .system(size: TextScale.scaled(size), weight: weight, design: .monospaced)
+    }
+}
+
+enum TextScale {
+    /// The largest text size the layout is designed to handle.
+    static let largest = UIContentSizeCategory.accessibilityMedium
+
+    @MainActor
+    static func scaled(_ size: CGFloat) -> CGFloat {
+        let current = UIApplication.shared.preferredContentSizeCategory
+        let category = current > largest ? largest : current
+        return UIFontMetrics(forTextStyle: .body)
+            .scaledValue(for: size, compatibleWith: UITraitCollection(preferredContentSizeCategory: category))
     }
 }

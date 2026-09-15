@@ -80,7 +80,7 @@ struct GameView: View {
             .overlay(alignment: .top) {
                 if let nudge {
                     Text(nudge)
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .font(.rounded(14, .semibold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
@@ -98,12 +98,14 @@ struct GameView: View {
             Spacer(minLength: 8)
             rollButton(game)
         }
+        // On iPad and Mac, keep the header and controls close to the board.
+        .frame(maxWidth: 760)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .overlay {
             if let winner = game.winner {
                 CertifiedPlate(
                     winnerName: name(of: winner, in: game),
-                    isMine: winner == session.mySeat || session.role == .local,
+                    isMine: session.computerSeat.map { winner != $0 } ?? (winner == session.mySeat || session.role == .local),
                     tally: scoreboardStore.scoreboard.tally(
                         between: playerName(of: .one, in: game),
                         and: playerName(of: .two, in: game)
@@ -129,14 +131,14 @@ struct GameView: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(turnHeadline(game))
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .font(.rounded(20, .semibold))
                     .foregroundStyle(Palette.ink)
                 HStack(spacing: 6) {
                     identityBadge(game)
                     if !game.rules.isClassic {
                         Button { showRules = true } label: {
                             Label("House rules", systemImage: "slider.horizontal.3")
-                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .font(.rounded(12, .bold))
                                 .foregroundStyle(Palette.felt)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
@@ -146,7 +148,7 @@ struct GameView: View {
                     }
                 }
                 Text(subhead(game))
-                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                    .font(.rounded(13, .regular))
                     .foregroundStyle(Palette.ink.opacity(0.55))
             }
             Spacer()
@@ -160,7 +162,7 @@ struct GameView: View {
                 }
                 .accessibilityLabel("How to play")
                 Button("Leave") { session.stop() }
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .font(.rounded(15, .medium))
                     .foregroundStyle(Palette.ink.opacity(0.5))
             }
         }
@@ -177,8 +179,8 @@ struct GameView: View {
                 HelmetShape(tint: Palette.color(color))
                     .frame(width: 18, height: 18)
             }
-            Text(session.role == .local ? "\(playerName(of: game.turn.seat, in: game)) · \(names)" : "You're \(names)")
-                .font(.system(size: 13, weight: .bold, design: .rounded))
+            Text(session.role == .local && session.computerSeat == nil ? "\(playerName(of: game.turn.seat, in: game)) · \(names)" : "You're \(names)")
+                .font(.rounded(13, .bold))
                 .foregroundStyle(Palette.ink)
         }
         .padding(.leading, 6)
@@ -195,7 +197,7 @@ struct GameView: View {
                 HelmetShape(tint: Palette.felt, lensLit: true)
                     .frame(width: 20, height: 20)
                 Text(hint)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .font(.rounded(14, .medium))
                     .foregroundStyle(Palette.ink.opacity(0.8))
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -258,10 +260,10 @@ struct GameView: View {
         } label: {
             VStack(spacing: 1) {
                 Text(rollLabel(game))
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .font(.rounded(18, .semibold))
                 if canRoll(game) {
                     Text("roll the dice")
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(.rounded(11, .medium))
                         .opacity(0.7)
                 }
             }
@@ -282,14 +284,14 @@ struct GameView: View {
         VStack(spacing: 14) {
             ProgressView().controlSize(.large)
             Text("Reconnecting")
-                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .font(.rounded(22, .bold))
                 .foregroundStyle(Palette.ink)
             Text("The game is saved. Keep both phones awake with Parjamie open.")
-                .font(.system(size: 14, design: .rounded))
+                .font(.rounded(14))
                 .foregroundStyle(Palette.ink.opacity(0.55))
                 .multilineTextAlignment(.center)
             Button("Leave game") { session.stop() }
-                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .font(.rounded(15, .medium))
                 .foregroundStyle(Palette.ink.opacity(0.5))
                 .padding(.top, 4)
         }
@@ -323,6 +325,9 @@ struct GameView: View {
     private func turnHeadline(_ game: GameState) -> String {
         if game.winner != nil { return "Game over" }
         if session.role == .local {
+            if let computer = session.computerSeat {
+                return game.turn.seat == computer ? "\(playerName(of: computer, in: game))'s turn" : "Your turn"
+            }
             return "\(playerName(of: game.turn.seat, in: game))'s turn"
         }
         return session.canAct ? "Your turn" : "\(session.peerName ?? "Waiting")'s turn"
@@ -352,7 +357,10 @@ struct GameView: View {
         return "Strike an arc"
     }
 
-    private var otherName: String { session.peerName ?? "The other player" }
+    private var otherName: String {
+        if let computer = session.computerSeat, let game = session.game { return playerName(of: computer, in: game) }
+        return session.peerName ?? "The other player"
+    }
 
     private func canRoll(_ game: GameState) -> Bool {
         session.canAct && game.turn.phase == .awaitingRoll
@@ -394,7 +402,8 @@ struct GameView: View {
                     setup: game.setup,
                     players: [playerName(of: .one, in: game), playerName(of: .two, in: game)],
                     winner: playerName(of: winner, in: game),
-                    onePhone: session.role == .local
+                    onePhone: session.role == .local,
+                    vsComputer: session.computerSeat != nil
                 ))
             }
         }
@@ -473,7 +482,7 @@ struct GameView: View {
 
     private func tap(_ pawn: PawnID, in game: GameState) {
         guard session.canAct else {
-            if game.winner == nil { show("It's \(session.peerName ?? "the other player")'s turn.") }
+            if game.winner == nil { show("It's \(otherName)'s turn.") }
             return
         }
         guard let move = availableMoves(game).first(where: { $0.pawn == pawn }) else {
@@ -489,6 +498,7 @@ struct GameView: View {
     private func show(_ message: String) {
         nudgeTask?.cancel()
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { nudge = message }
+        AccessibilityNotification.Announcement(message).post()
         nudgeTask = Task {
             try? await Task.sleep(for: .seconds(3.5))
             guard !Task.isCancelled else { return }

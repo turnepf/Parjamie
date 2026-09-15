@@ -18,6 +18,7 @@
 		9FE8A51EAC9666B9A104044C /* ParjamieNet in Frameworks */ = {isa = PBXBuildFile; productRef = 1E417820269079549451F213 /* ParjamieNet */; };
 		ACE5AE3B5A9DFD5035F29F57 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A365AC16B0682B4AD40B7E47 /* GameView.swift */; };
 		AEB76F2E92C4A0AFF356107B /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB82E920B2773644403644A /* BoardView.swift */; };
+		B213978FEDAAE7DE47259B07 /* WelcomeTourView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6436C86FDC2D6C485A6A57 /* WelcomeTourView.swift */; };
 		BAF7697AECC6172A9650C9F6 /* ScoreboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 954E664680AE9A706D9EAE26 /* ScoreboardView.swift */; };
 		BB6E7C5559C2808D45F61512 /* DiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FE5289B5D6ED2B1B6ED31C /* DiceView.swift */; };
 		C3C6F31D621840313708AD04 /* arc.wav in Resources */ = {isa = PBXBuildFile; fileRef = DA1C2C5DA750D8A27B05AA84 /* arc.wav */; };
@@ -39,6 +40,7 @@
 		954E664680AE9A706D9EAE26 /* ScoreboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardView.swift; sourceTree = "<group>"; };
 		A2E9201B94A672D43A21CCC6 /* Effects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Effects.swift; sourceTree = "<group>"; };
 		A365AC16B0682B4AD40B7E47 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
+		AB6436C86FDC2D6C485A6A57 /* WelcomeTourView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeTourView.swift; sourceTree = "<group>"; };
 		BFB82E920B2773644403644A /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
 		DA1C2C5DA750D8A27B05AA84 /* arc.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = arc.wav; sourceTree = "<group>"; };
 		E79AE7381721BA0886CF7E59 /* ParjamieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParjamieApp.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 				248CD3E3733B4AECE6595852 /* ScoreboardStore.swift */,
 				954E664680AE9A706D9EAE26 /* ScoreboardView.swift */,
 				714737E2AB25950DC0148D34 /* Theme.swift */,
+				AB6436C86FDC2D6C485A6A57 /* WelcomeTourView.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -221,6 +224,7 @@
 				54432D21D819F0693B0455D9 /* ScoreboardStore.swift in Sources */,
 				BAF7697AECC6172A9650C9F6 /* ScoreboardView.swift in Sources */,
 				24E50124C1125D40DF3C5CF2 /* Theme.swift in Sources */,
+				B213978FEDAAE7DE47259B07 /* WelcomeTourView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,9 +298,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "App/Resources/Parjamie-Mac.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = NQ6AJVVBBJ;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -308,6 +314,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = net.parjamie.game;
 				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -317,9 +324,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "App/Resources/Parjamie-Mac.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = NQ6AJVVBBJ;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -331,6 +340,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = net.parjamie.game;
 				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

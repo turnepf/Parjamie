@@ -29,7 +29,7 @@ struct HouseRulesView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Text("HOUSE RULES")
-                        .font(.system(size: 26, weight: .black, design: .rounded))
+                        .font(.rounded(26, .black))
                         .tracking(2)
                         .foregroundStyle(.white)
                     Spacer()
@@ -44,7 +44,7 @@ struct HouseRulesView: View {
                 Text(editable
                      ? "Change how the game plays. When you host, the other phone plays by your rules."
                      : (rules.isClassic ? "This game uses the classic rules." : "This game uses these house rules."))
-                    .font(.system(size: 14, design: .rounded))
+                    .font(.rounded(14))
                     .foregroundStyle(.white.opacity(0.7))
 
                 group("Getting going") {
@@ -81,7 +81,7 @@ struct HouseRulesView: View {
                         rules = .classic
                     } label: {
                         Label("Back to classic rules", systemImage: "arrow.counterclockwise")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .font(.rounded(16, .semibold))
                             .frame(maxWidth: .infinity, minHeight: 48)
                             .foregroundStyle(.white)
                             .steelPlate()
@@ -109,7 +109,7 @@ struct HouseRulesView: View {
     private func group<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(title.uppercased())
-                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                .font(.mono(13, .bold))
                 .tracking(2)
                 .foregroundStyle(Palette.arc)
             content()
@@ -129,7 +129,7 @@ struct HouseRulesView: View {
                     labels(title, detail)
                     Spacer()
                     Text(isOn.wrappedValue ? "On" : "Off")
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .font(.rounded(15, .bold))
                         .foregroundStyle(isOn.wrappedValue ? Palette.arc : .white.opacity(0.5))
                 }
             }
@@ -151,7 +151,7 @@ struct HouseRulesView: View {
                     labels(title, detail)
                     Spacer()
                     Text(options.first { $0.0 == selection.wrappedValue }?.1 ?? "")
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .font(.rounded(15, .bold))
                         .foregroundStyle(Palette.arc)
                 }
             }
@@ -161,10 +161,10 @@ struct HouseRulesView: View {
     private func labels(_ title: String, _ detail: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .font(.rounded(16, .semibold))
                 .foregroundStyle(.white)
             Text(detail)
-                .font(.system(size: 12, design: .rounded))
+                .font(.rounded(12))
                 .foregroundStyle(.white.opacity(0.55))
                 .fixedSize(horizontal: false, vertical: true)
         }

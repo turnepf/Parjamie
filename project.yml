@@ -44,6 +44,7 @@ targets:
           Parjamie looks for the other player's phone on your network so the two of you can play.
         NSBonjourServices:
           - _parjamie._tcp
+        LSApplicationCategoryType: public.app-category.board-games
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: net.parjamie.game
@@ -56,3 +57,7 @@ targets:
         DEVELOPMENT_TEAM: NQ6AJVVBBJ
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # A native Mac app built from the same code, sharing the iPhone app's bundle ID.
+        SUPPORTS_MACCATALYST: YES
+        DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER: NO
+        "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": App/Resources/Parjamie-Mac.entitlements

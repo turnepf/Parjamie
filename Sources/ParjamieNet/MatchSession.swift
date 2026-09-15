@@ -50,6 +50,11 @@ public final class MatchSession {
     /// game, including rematches the guest asks for.
     public private(set) var houseRules = HouseRules.classic
 
+    /// The seat the computer plays, when playing against it on this phone.
+    public private(set) var computerSeat: Seat?
+    public private(set) var computerLevel: ComputerPlayer.Level = .easy
+    private var computerTurn: Task<Void, Never>?
+
     /// Names for each seat when both players share this phone, in seat order.
     public private(set) var localPlayerNames: [String] = []
 
@@ -80,18 +85,33 @@ public final class MatchSession {
     /// Whether this device may act right now.
     public var canAct: Bool {
         guard let game, game.winner == nil else { return false }
-        if role == .local { return true }
+        if role == .local { return game.turn.seat != computerSeat }
         return status == .playing && game.turn.seat == mySeat
     }
 
     /// The seat this device draws as "yours". In local play that follows the turn.
     public var viewingSeat: Seat {
-        role == .local ? (game?.turn.seat ?? .one) : mySeat
+        if role == .local, computerSeat == nil { return game?.turn.seat ?? .one }
+        return mySeat
     }
 
     // MARK: Starting a match
 
     /// Play both seats on this device. Useful for checking the board before Jamie is around.
+    /// Play against the computer on this phone. The player takes seat one and moves first.
+    public func startComputerGame(setup: PawnSetup, playerName: String, level: ComputerPlayer.Level, rules: HouseRules = .classic) {
+        startLocalGame(setup: setup, names: [playerName, Self.computerName(for: level)], rules: rules)
+        computerSeat = .two
+        computerLevel = level
+    }
+
+    public static func computerName(for level: ComputerPlayer.Level) -> String {
+        switch level {
+        case .easy: "Sparky"
+        case .hard: "Torch"
+        }
+    }
+
     public func startLocalGame(setup: PawnSetup, names: [String] = [], rules: HouseRules = .classic) {
         stop()
         localPlayerNames = names
@@ -204,6 +224,9 @@ public final class MatchSession {
     public func stop() {
         heartbeat?.cancel()
         heartbeat = nil
+        computerTurn?.cancel()
+        computerTurn = nil
+        computerSeat = nil
         reconnectLoop?.cancel()
         reconnectLoop = nil
         hostEndpoint = nil
@@ -228,6 +251,7 @@ public final class MatchSession {
             Rules.applyRoll(cup.roll(), to: &next)
             game = next
             broadcast()
+            playComputerTurnIfNeeded()
         case .guest:
             link?.send(.requestRoll)
         }
@@ -241,6 +265,7 @@ public final class MatchSession {
             lastOutcome = Rules.apply(move, to: &next)
             game = next
             broadcast()
+            playComputerTurnIfNeeded()
         case .guest:
             link?.send(.requestMove(move))
         }
@@ -252,6 +277,7 @@ public final class MatchSession {
             game = freshGame(setup: setup)
             lastOutcome = nil
             broadcast()
+            playComputerTurnIfNeeded()
         case .guest:
             link?.send(.requestNewGame(setup))
         }
@@ -263,6 +289,34 @@ public final class MatchSession {
         var fresh = GameState(setup: setup, rules: houseRules)
         fresh.version = (game?.version ?? 0) + 1
         return fresh
+    }
+
+    // MARK: Computer opponent
+
+    /// Rolls and moves for the computer, one step at a time with pauses long enough to
+    /// follow along, until the turn passes back to the player.
+    private func playComputerTurnIfNeeded() {
+        guard computerTurn == nil, let computerSeat, let game, game.winner == nil, game.turn.seat == computerSeat else { return }
+        computerTurn = Task { [weak self] in
+            var generator = SystemRandomNumberGenerator()
+            while !Task.isCancelled {
+                guard let self, let current = self.game, current.winner == nil, current.turn.seat == computerSeat else { break }
+                try? await Task.sleep(for: .milliseconds(current.turn.phase == .awaitingRoll ? 900 : 1100))
+                guard !Task.isCancelled, let latest = self.game, latest.turn.seat == computerSeat, latest.winner == nil else { break }
+                var next = latest
+                switch latest.turn.phase {
+                case .awaitingRoll:
+                    Rules.applyRoll(self.cup.roll(), to: &next)
+                case .moving:
+                    guard let move = ComputerPlayer.chooseMove(in: latest, level: self.computerLevel, using: &generator) else { break }
+                    self.lastOutcome = Rules.apply(move, to: &next)
+                case .finished:
+                    break
+                }
+                self.game = next
+            }
+            self?.computerTurn = nil
+        }
     }
 
     // MARK: Message handling

@@ -44,6 +44,8 @@ struct DieFace: View {
             .frame(width: side, height: side)
         }
         .aspectRatio(1, contentMode: .fit)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Die showing \(value)")
     }
 }
 
@@ -68,7 +70,7 @@ struct ValueChip: View {
     var body: some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .font(.rounded(20, .semibold))
                 .monospacedDigit()
                 .foregroundStyle(isSelected ? Palette.parchment : tint)
                 .frame(minWidth: 52, minHeight: 44)
@@ -84,5 +86,7 @@ struct ValueChip: View {
         .buttonStyle(.plain)
         .opacity(isEnabled ? 1 : 0.4)
         .disabled(!isEnabled)
+        .accessibilityLabel(value.kind == .die ? "Move \(value.amount)" : "Bonus move \(value.amount)")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

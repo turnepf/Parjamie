@@ -11,14 +11,17 @@ public struct GameRecord: Hashable, Codable, Sendable, Identifiable {
     public let winner: String
     /// Played by passing one phone back and forth, rather than on two phones.
     public let onePhone: Bool
+    /// Played against the computer. Optional so scoreboards saved before it existed load.
+    public var vsComputer: Bool?
 
-    public init(id: UUID, finishedAt: Date, setup: PawnSetup, players: [String], winner: String, onePhone: Bool) {
+    public init(id: UUID, finishedAt: Date, setup: PawnSetup, players: [String], winner: String, onePhone: Bool, vsComputer: Bool = false) {
         self.id = id
         self.finishedAt = finishedAt
         self.setup = setup
         self.players = players
         self.winner = winner
         self.onePhone = onePhone
+        self.vsComputer = vsComputer
     }
 
     public var loser: String? {

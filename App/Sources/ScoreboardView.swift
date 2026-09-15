@@ -15,7 +15,7 @@ struct ScoreboardView: View {
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
                     Text("SCOREBOARD")
-                        .font(.system(size: 26, weight: .black, design: .rounded))
+                        .font(.rounded(26, .black))
                         .tracking(2)
                         .foregroundStyle(.white)
                     Spacer()
@@ -50,10 +50,10 @@ struct ScoreboardView: View {
             HelmetShape(tint: Palette.color(.red), lensLit: true)
                 .frame(width: 56, height: 56)
             Text("No games finished yet")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(.rounded(18, .bold))
                 .foregroundStyle(.white)
             Text("Every game played to the end shows up here, on both phones.")
-                .font(.system(size: 14, design: .rounded))
+                .font(.rounded(14))
                 .foregroundStyle(.white.opacity(0.65))
                 .multilineTextAlignment(.center)
         }
@@ -66,7 +66,7 @@ struct ScoreboardView: View {
         VStack(spacing: 8) {
             label("Head to head")
             Text(board.tally(between: highlight[0], and: highlight[1]))
-                .font(.system(size: 26, weight: .black, design: .rounded))
+                .font(.rounded(26, .black))
                 .foregroundStyle(Palette.arc)
                 .multilineTextAlignment(.center)
         }
@@ -81,20 +81,20 @@ struct ScoreboardView: View {
             ForEach(Array(board.standings.enumerated()), id: \.element.name) { place, standing in
                 HStack(spacing: 12) {
                     Text("\(place + 1)")
-                        .font(.system(size: 14, weight: .black, design: .rounded))
+                        .font(.rounded(14, .black))
                         .foregroundStyle(Palette.ink)
                         .frame(width: 26, height: 26)
                         .background(Circle().fill(place == 0 ? Palette.arc : Color(white: 0.7)))
                     Text(standing.name)
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .font(.rounded(17, .semibold))
                         .foregroundStyle(.white)
                     Spacer()
                     VStack(alignment: .trailing, spacing: 1) {
                         Text("\(standing.wins) \(standing.wins == 1 ? "win" : "wins")")
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .font(.rounded(17, .bold))
                             .foregroundStyle(.white)
                         Text("of \(standing.played) played")
-                            .font(.system(size: 12, design: .rounded))
+                            .font(.rounded(12))
                             .foregroundStyle(.white.opacity(0.55))
                     }
                 }
@@ -110,16 +110,16 @@ struct ScoreboardView: View {
             label("Recent games")
             ForEach(board.records.prefix(30)) { record in
                 HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: record.onePhone ? "iphone" : "iphone.gen3.radiowaves.left.and.right")
+                    Image(systemName: record.vsComputer == true ? "cpu" : (record.onePhone ? "iphone" : "iphone.gen3.radiowaves.left.and.right"))
                         .font(.system(size: 15))
                         .foregroundStyle(.white.opacity(0.5))
                         .frame(width: 22)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(record.loser.map { "\(record.winner) beat \($0)" } ?? "\(record.winner) won")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .font(.rounded(15, .semibold))
                             .foregroundStyle(.white)
-                        Text("\(record.finishedAt.formatted(date: .abbreviated, time: .shortened)) · \(record.setup.title) · \(record.onePhone ? "one phone" : "two phones")")
-                            .font(.system(size: 12, design: .rounded))
+                        Text("\(record.finishedAt.formatted(date: .abbreviated, time: .shortened)) · \(record.setup.title) · \(record.vsComputer == true ? "vs computer" : (record.onePhone ? "one phone" : "two phones"))")
+                            .font(.rounded(12))
                             .foregroundStyle(.white.opacity(0.55))
                     }
                 }
@@ -132,7 +132,7 @@ struct ScoreboardView: View {
 
     private func label(_ text: String) -> some View {
         Text(text.uppercased())
-            .font(.system(size: 13, weight: .bold, design: .monospaced))
+            .font(.mono(13, .bold))
             .tracking(2)
             .foregroundStyle(Palette.arc)
     }

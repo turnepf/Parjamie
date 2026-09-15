@@ -38,9 +38,24 @@ enum HintSetting {
     static let key = "showHints"
 }
 
+extension RootView {
+    /// On the Mac the game runs in a resizable window. Keep it tall enough for the board
+    /// and its controls, and no wider than looks right.
+    func limitMacWindowSize() {
+        #if targetEnvironment(macCatalyst)
+        for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
+            scene.sizeRestrictions?.minimumSize = CGSize(width: 520, height: 860)
+            scene.sizeRestrictions?.maximumSize = CGSize(width: 1100, height: 1400)
+        }
+        #endif
+    }
+}
+
 struct RootView: View {
     @Bindable var session: MatchSession
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @AppStorage(WelcomeTourSetting.key) private var seenWelcomeTour = false
 
     var body: some View {
         ZStack {
@@ -53,7 +68,13 @@ struct RootView: View {
                     .transition(.opacity)
             }
         }
+        // Fonts are sized from the text size setting when drawn, so rebuild when it changes.
+        .id(typeSize)
         .animation(.easeInOut(duration: 0.25), value: session.status)
+        .fullScreenCover(isPresented: Binding(get: { !seenWelcomeTour }, set: { seenWelcomeTour = !$0 })) {
+            WelcomeTourView { seenWelcomeTour = true }
+        }
+        .onAppear(perform: limitMacWindowSize)
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { session.appBecameActive() }
         }
