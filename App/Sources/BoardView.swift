@@ -47,6 +47,7 @@ struct BoardView: View {
                 ForEach(game.pawns) { pawn in
                     PawnView(
                         color: pawn.color,
+                        isSafe: isOnSafeSquare(pawn),
                         isMovable: movable.contains(pawn.id),
                         isSelected: selected == pawn.id,
                         counterRotation: -quarterTurns * 90
@@ -248,10 +249,15 @@ struct BoardView: View {
         let box = rect(BoardGeometry.cell(ring: index), unit: unit)
 
         if let owner = PlayerColor.allCases.first(where: { Board.entryIndex(for: $0) == index }) {
-            // Painted start square, with its tack weld showing through.
+            // Painted start square, framed in the safe-square violet because it is one.
             context.fill(Path(box.insetBy(dx: unit * 0.05, dy: unit * 0.05)), with: .color(Palette.color(owner).opacity(0.9)))
+            context.stroke(Path(box.insetBy(dx: unit * 0.1, dy: unit * 0.1)), with: .color(Palette.safe), lineWidth: unit * 0.12)
             Self.drawTackWeld(in: box, in: &context, unit: unit)
         } else if Board.isSafety(ring: index) {
+            context.fill(Path(box.insetBy(dx: unit * 0.05, dy: unit * 0.05)), with: .linearGradient(
+                Gradient(colors: [Palette.safe.opacity(0.95), Palette.safe.opacity(0.7)]),
+                startPoint: CGPoint(x: box.minX, y: box.minY), endPoint: CGPoint(x: box.maxX, y: box.maxY)
+            ))
             Self.drawTackWeld(in: box, in: &context, unit: unit)
         }
         context.stroke(Path(box), with: .color(Palette.seam.opacity(0.65)), lineWidth: unit * 0.035)
@@ -447,6 +453,11 @@ struct BoardView: View {
 
     // MARK: Placement
 
+    private func isOnSafeSquare(_ pawn: Pawn) -> Bool {
+        if case .ring(let index) = pawn.position { return Board.isSafety(ring: index) }
+        return false
+    }
+
     private func center(of cell: BoardGeometry.Cell, unit: CGFloat) -> CGPoint {
         CGPoint(x: (CGFloat(cell.column) + 0.5) * unit, y: (CGFloat(cell.row) + 0.5) * unit)
     }
@@ -535,6 +546,8 @@ private extension CGFloat {
 /// the pawn can move. It is counter-rotated with the board so it always faces the player.
 struct PawnView: View {
     let color: PlayerColor
+    /// On a safe square, where it cannot be captured. Shown as a small shield.
+    var isSafe = false
     let isMovable: Bool
     let isSelected: Bool
     let counterRotation: Double
@@ -552,6 +565,18 @@ struct PawnView: View {
                 }
                 HelmetShape(tint: Palette.color(color), lensLit: isMovable)
                     .shadow(color: .black.opacity(0.4), radius: size * 0.05, y: size * 0.05)
+                if isSafe {
+                    Image(systemName: "shield.fill")
+                        .font(.system(size: size * 0.3, weight: .bold))
+                        .foregroundStyle(Palette.safe)
+                        .overlay(
+                            Image(systemName: "shield")
+                                .font(.system(size: size * 0.3, weight: .bold))
+                                .foregroundStyle(.white)
+                        )
+                        .offset(x: size * 0.26, y: size * 0.24)
+                        .accessibilityLabel("Safe")
+                }
             }
             .frame(width: size * 0.7, height: size * 0.7)
             .frame(width: proxy.size.width, height: proxy.size.height)

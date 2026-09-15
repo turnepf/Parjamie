@@ -54,6 +54,7 @@ final class GameEventsTests: XCTestCase {
         before.version = 40
         var fresh = GameState(setup: .oneColorEach)
         fresh.version = 41
+        XCTAssertNotEqual(fresh.id, before.id)
         XCTAssertEqual(GameEvents.between(before, fresh), [])
     }
 }

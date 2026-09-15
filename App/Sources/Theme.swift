@@ -18,6 +18,9 @@ enum Palette {
     static let bead = Color(red: 0.74, green: 0.70, blue: 0.64)
     static let beadEdge = Color(red: 0.33, green: 0.30, blue: 0.28)
     static let heatTint = Color(red: 0.72, green: 0.56, blue: 0.30)
+    /// Safe squares are painted the violet heat tint steel takes on near a weld, so they
+    /// stand apart from every player's color.
+    static let safe = Color(red: 0.52, green: 0.33, blue: 0.82)
     /// The glow of a struck arc.
     static let arc = Color(red: 1.0, green: 0.56, blue: 0.12)
     static let ink = Color(red: 0.12, green: 0.13, blue: 0.15)

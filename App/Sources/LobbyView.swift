@@ -10,6 +10,9 @@ struct LobbyView: View {
     @AppStorage(SoundSetting.key) private var playSounds = true
     @FocusState private var nameFocused: Bool
     @State private var showHowToPlay = false
+    @State private var showScoreboard = false
+    @State private var showOnePhone = false
+    @AppStorage(SecondPlayerName.key) private var secondName = ""
 
     private var trimmedName: String {
         playerName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -41,6 +44,14 @@ struct LobbyView: View {
         .preferredColorScheme(.dark)
         .animation(.easeInOut(duration: 0.2), value: session.discovered)
         .sheet(isPresented: $showHowToPlay) { HowToPlayView() }
+        .sheet(isPresented: $showScoreboard) { ScoreboardView() }
+        .sheet(isPresented: $showOnePhone) {
+            OnePhoneSetupView(firstName: $playerName, secondName: $secondName, setup: setup) { names in
+                showOnePhone = false
+                session.startLocalGame(setup: setup, names: names)
+            }
+            .presentationDetents([.medium])
+        }
     }
 
     private var title: some View {
@@ -109,20 +120,28 @@ struct LobbyView: View {
             .steelPlate()
 
             VStack(spacing: 12) {
-                primary("Host a game") {
-                    session.displayName = trimmedName
-                    session.startHosting(setup: setup)
+                // Two phones: one hosts, the other joins.
+                HStack(spacing: 12) {
+                    primary("Host a game") {
+                        session.displayName = trimmedName
+                        session.startHosting(setup: setup)
+                    }
+                    secondary("Join a game") {
+                        session.displayName = trimmedName
+                        session.startSearching()
+                    }
                 }
                 .disabled(trimmedName.isEmpty)
                 .opacity(trimmedName.isEmpty ? 0.4 : 1)
-                secondary("Join a game") {
-                    session.displayName = trimmedName
-                    session.startSearching()
+                secondary("Play together on this phone", systemImage: "iphone") {
+                    showOnePhone = true
                 }
-                .disabled(trimmedName.isEmpty)
-                .opacity(trimmedName.isEmpty ? 0.4 : 1)
-                HStack(spacing: 22) {
-                    Button("Both of us on this phone") { session.startLocalGame(setup: setup) }
+                HStack(spacing: 26) {
+                    Button {
+                        showScoreboard = true
+                    } label: {
+                        Label("Scoreboard", systemImage: "list.number")
+                    }
                     Button {
                         showHowToPlay = true
                     } label: {
@@ -285,9 +304,12 @@ struct LobbyView: View {
         .buttonStyle(.plain)
     }
 
-    private func secondary(_ label: String, action: @escaping () -> Void) -> some View {
+    private func secondary(_ label: String, systemImage: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(label)
+            HStack(spacing: 8) {
+                if let systemImage { Image(systemName: systemImage) }
+                Text(label)
+            }
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .frame(maxWidth: .infinity, minHeight: 54)
                 .foregroundStyle(.white)
@@ -363,5 +385,67 @@ private struct SteelPlate: ViewModifier {
 extension View {
     func steelPlate(highlighted: Bool = false) -> some View {
         modifier(SteelPlate(highlighted: highlighted))
+    }
+}
+
+/// Names for both players before a game passed back and forth on one phone.
+struct OnePhoneSetupView: View {
+    @Binding var firstName: String
+    @Binding var secondName: String
+    let setup: PawnSetup
+    let onStart: ([String]) -> Void
+
+    private var names: [String] {
+        [firstName, secondName].map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("PLAY ON ONE PHONE")
+                .font(.system(size: 20, weight: .black, design: .rounded))
+                .tracking(2)
+                .foregroundStyle(.white)
+            Text("Take turns passing the phone. The board turns to face whoever is up.")
+                .font(.system(size: 14, design: .rounded))
+                .foregroundStyle(.white.opacity(0.65))
+            playerField("First player", tint: Palette.color(setup.colors(for: .one)[0]), text: $firstName)
+            playerField("Second player", tint: Palette.color(setup.colors(for: .two)[0]), text: $secondName)
+            Button {
+                onStart(names)
+            } label: {
+                Text("Start")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .frame(maxWidth: .infinity, minHeight: 54)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(.linearGradient(colors: [Color(red: 1, green: 0.72, blue: 0.3), Palette.arc, Color(red: 0.85, green: 0.38, blue: 0.05)],
+                                                  startPoint: .top, endPoint: .bottom))
+                    )
+                    .foregroundStyle(Palette.ink)
+            }
+            .buttonStyle(.plain)
+            .disabled(names.contains(where: \.isEmpty))
+            .opacity(names.contains(where: \.isEmpty) ? 0.4 : 1)
+            Spacer(minLength: 0)
+        }
+        .padding(24)
+        .background { ShopBackdrop().ignoresSafeArea() }
+        .preferredColorScheme(.dark)
+    }
+
+    private func playerField(_ label: String, tint: Color, text: Binding<String>) -> some View {
+        HStack(spacing: 12) {
+            HelmetShape(tint: tint, lensLit: true)
+                .frame(width: 34, height: 34)
+            TextField("", text: text, prompt: Text(label).foregroundStyle(.white.opacity(0.35)))
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                .tint(Palette.arc)
+                .textInputAutocapitalization(.words)
+                .autocorrectionDisabled()
+                .padding(12)
+                .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(.black.opacity(0.4)))
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(.white.opacity(0.14), lineWidth: 1))
+        }
     }
 }

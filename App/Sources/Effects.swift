@@ -150,7 +150,9 @@ struct OverheatedBanner: View {
 struct CertifiedPlate: View {
     let winnerName: String
     let isMine: Bool
+    var tally: String?
     let onNewGame: () -> Void
+    var onScoreboard: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 14) {
@@ -175,18 +177,40 @@ struct CertifiedPlate: View {
                 .padding(.vertical, 5)
                 .overlay(RoundedRectangle(cornerRadius: 4).stroke(Palette.color(.red).opacity(0.85), lineWidth: 2))
                 .rotationEffect(.degrees(-4))
-            Button(action: onNewGame) {
-                Text("New game")
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Palette.parchment)
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 14)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Palette.felt))
+            if let tally {
+                Text(tally)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(Palette.ink.opacity(0.75))
             }
-            .buttonStyle(.plain)
+            HStack(spacing: 10) {
+                if let onScoreboard {
+                    Button(action: onScoreboard) {
+                        Label("Scoreboard", systemImage: "list.number")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .lineLimit(1)
+                            .fixedSize()
+                            .foregroundStyle(Palette.felt)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 14)
+                            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Palette.felt, lineWidth: 1.5))
+                    }
+                    .buttonStyle(.plain)
+                }
+                Button(action: onNewGame) {
+                    Text("New game")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .lineLimit(1)
+                        .fixedSize()
+                        .foregroundStyle(Palette.parchment)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+                        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Palette.felt))
+                }
+                .buttonStyle(.plain)
+            }
             .padding(.top, 4)
         }
-        .padding(.horizontal, 30)
+        .padding(.horizontal, 22)
         .padding(.vertical, 28)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -211,31 +235,49 @@ struct CertifiedPlate: View {
 
 /// Short shop sounds. They play through the ambient channel, so the ring/silent switch
 /// mutes them and they never interrupt music.
-@MainActor
-final class ShopSounds {
-    enum Effect: String, CaseIterable {
+///
+/// Everything happens on a private queue. Starting audio can stall for a moment while
+/// iOS brings up its audio service, and that must never freeze the board.
+final class ShopSounds: @unchecked Sendable {
+    enum Effect: String, CaseIterable, Sendable {
         case arc
         case burst
         case sizzle
     }
 
     static let shared = ShopSounds()
-    private var players: [Effect: AVAudioPlayer] = [:]
 
-    private init() {
+    private let queue = DispatchQueue(label: "net.parjamie.sounds", qos: .userInitiated)
+    /// Only touched on `queue`.
+    private var players: [Effect: AVAudioPlayer]?
+
+    private init() {}
+
+    /// Loads the sounds ahead of the first game so the first spark is not late.
+    func warmUp() {
+        queue.async { _ = self.loadedPlayers() }
+    }
+
+    func play(_ effect: Effect) {
+        queue.async {
+            guard let player = self.loadedPlayers()[effect] else { return }
+            player.currentTime = 0
+            player.play()
+        }
+    }
+
+    private func loadedPlayers() -> [Effect: AVAudioPlayer] {
+        if let players { return players }
         try? AVAudioSession.sharedInstance().setCategory(.ambient)
+        var loaded: [Effect: AVAudioPlayer] = [:]
         for effect in Effect.allCases {
             guard let url = Bundle.main.url(forResource: effect.rawValue, withExtension: "wav"),
                   let player = try? AVAudioPlayer(contentsOf: url) else { continue }
             player.prepareToPlay()
-            players[effect] = player
+            loaded[effect] = player
         }
-    }
-
-    func play(_ effect: Effect) {
-        guard let player = players[effect] else { return }
-        player.currentTime = 0
-        player.play()
+        players = loaded
+        return loaded
     }
 }
 

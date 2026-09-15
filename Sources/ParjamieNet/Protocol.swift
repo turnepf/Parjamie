@@ -4,7 +4,7 @@ import ParjamieEngine
 /// Bumped whenever the messages below change shape. The two devices compare this
 /// during the handshake so a stale build says so instead of corrupting a game.
 public enum ProtocolVersion {
-    public static let current = 1
+    public static let current = 2
 }
 
 public enum BonjourService {
@@ -55,6 +55,9 @@ public enum GameMessage: Hashable, Codable, Sendable {
     case requestNewGame(PawnSetup)
     case ping
     case pong
+    /// Every finished game this phone remembers. Both phones send theirs after connecting
+    /// and keep the union, so the two scoreboards agree.
+    case scoreboard([GameRecord])
 }
 
 // MARK: - Framing

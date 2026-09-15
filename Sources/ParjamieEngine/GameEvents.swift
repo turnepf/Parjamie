@@ -20,7 +20,8 @@ public enum GameEvents {
 
     public static func between(_ old: GameState, _ new: GameState) -> [GameEvent] {
         // A different game (new setup, or a fresh start) is not a sequence of moves.
-        guard new.version > old.version,
+        guard new.id == old.id,
+              new.version > old.version,
               old.setup == new.setup,
               old.pawns.map(\.id) == new.pawns.map(\.id) else { return [] }
 

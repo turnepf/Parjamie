@@ -17,6 +17,8 @@ struct GameView: View {
     @State private var nudge: String?
     @State private var nudgeTask: Task<Void, Never>?
     @State private var showHowToPlay = false
+    @State private var showScoreboard = false
+    @Environment(ScoreboardStore.self) private var scoreboardStore
     @AppStorage(HowToPlaySetting.seenKey) private var seenHowToPlay = false
 
     var body: some View {
@@ -24,7 +26,7 @@ struct GameView: View {
             board(game)
                 .onChange(of: session.game) { old, new in
                     guard let old, let new else { return }
-                    celebrate(GameEvents.between(old, new))
+                    celebrate(GameEvents.between(old, new), in: new)
                 }
                 .sensoryFeedback(.impact(weight: .light), trigger: moveTick)
                 .sensoryFeedback(.impact(weight: .heavy, intensity: 1), trigger: captureTick)
@@ -37,6 +39,9 @@ struct GameView: View {
                         isLocal: session.role == .local,
                         otherName: session.peerName
                     )
+                }
+                .sheet(isPresented: $showScoreboard) {
+                    ScoreboardView(highlight: [playerName(of: .one, in: game), playerName(of: .two, in: game)])
                 }
                 .onAppear {
                     if !seenHowToPlay {
@@ -94,7 +99,12 @@ struct GameView: View {
                 CertifiedPlate(
                     winnerName: name(of: winner, in: game),
                     isMine: winner == session.mySeat || session.role == .local,
-                    onNewGame: { session.startNewGame(setup: game.setup) }
+                    tally: scoreboardStore.scoreboard.tally(
+                        between: playerName(of: .one, in: game),
+                        and: playerName(of: .two, in: game)
+                    ),
+                    onNewGame: { session.startNewGame(setup: game.setup) },
+                    onScoreboard: { showScoreboard = true }
                 )
             } else if session.status == .reconnecting {
                 reconnectingBanner
@@ -149,7 +159,7 @@ struct GameView: View {
                 HelmetShape(tint: Palette.color(color))
                     .frame(width: 18, height: 18)
             }
-            Text(session.role == .local ? "\(names)'s helmets" : "You're \(names)")
+            Text(session.role == .local ? "\(playerName(of: game.turn.seat, in: game)) · \(names)" : "You're \(names)")
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundStyle(Palette.ink)
         }
@@ -274,16 +284,28 @@ struct GameView: View {
     // MARK: Wording
 
     private func name(of seat: Seat, in game: GameState) -> String {
-        if session.role == .local {
-            return game.colors(for: seat).map(Palette.name).joined(separator: " and ")
-        }
+        if session.role == .local { return playerName(of: seat, in: game) }
         return seat == session.mySeat ? "You" : (session.peerName ?? "The other player")
+    }
+
+    /// The name a seat's player typed, for the scoreboard and one-phone games. Falls
+    /// back to the seat's colors when no name is known.
+    private func playerName(of seat: Seat, in game: GameState) -> String {
+        let typed: String?
+        switch session.role {
+        case .local:
+            typed = session.localPlayerNames.indices.contains(seat.rawValue) ? session.localPlayerNames[seat.rawValue] : nil
+        case .host, .guest:
+            typed = seat == session.mySeat ? session.displayName : session.peerName
+        }
+        if let typed, !typed.trimmingCharacters(in: .whitespaces).isEmpty { return typed }
+        return game.colors(for: seat).map(Palette.name).joined(separator: " and ")
     }
 
     private func turnHeadline(_ game: GameState) -> String {
         if game.winner != nil { return "Game over" }
         if session.role == .local {
-            return "\(name(of: game.turn.seat, in: game)) to play"
+            return "\(playerName(of: game.turn.seat, in: game))'s turn"
         }
         return session.canAct ? "Your turn" : "\(session.peerName ?? "Waiting")'s turn"
     }
@@ -320,7 +342,7 @@ struct GameView: View {
 
     // MARK: Game moments
 
-    private func celebrate(_ events: [GameEvent]) {
+    private func celebrate(_ events: [GameEvent], in game: GameState) {
         guard !events.isEmpty else { return }
         var sound: ShopSounds.Effect?
         for event in events {
@@ -345,9 +367,17 @@ struct GameView: View {
                     try? await Task.sleep(for: .seconds(2.2))
                     withAnimation(.easeOut(duration: 0.3)) { showOverheated = false }
                 }
-            case .won:
+            case .won(let winner):
                 winTick += 1
                 sound = .burst
+                scoreboardStore.record(GameRecord(
+                    id: game.id,
+                    finishedAt: Date(),
+                    setup: game.setup,
+                    players: [playerName(of: .one, in: game), playerName(of: .two, in: game)],
+                    winner: playerName(of: winner, in: game),
+                    onePhone: session.role == .local
+                ))
             }
         }
         if playSounds, let sound { ShopSounds.shared.play(sound) }
@@ -369,8 +399,14 @@ struct GameView: View {
     }
 
     private func bayLabels(_ game: GameState) -> [PlayerColor: String] {
-        guard session.role != .local else { return [:] }
         var labels: [PlayerColor: String] = [:]
+        if session.role == .local {
+            guard !session.localPlayerNames.isEmpty else { return [:] }
+            for seat in Seat.allCases {
+                for color in game.colors(for: seat) { labels[color] = playerName(of: seat, in: game).uppercased() }
+            }
+            return labels
+        }
         for color in game.colors(for: session.mySeat) { labels[color] = "YOU" }
         let other = (session.peerName ?? "Them").uppercased()
         for color in game.colors(for: session.mySeat.opponent) { labels[color] = other }

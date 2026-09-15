@@ -171,6 +171,9 @@ public struct TurnState: Hashable, Codable, Sendable {
 /// The complete game. This is the unit the host broadcasts after every move, so it
 /// carries a version counter the other device uses to detect gaps.
 public struct GameState: Hashable, Codable, Sendable {
+    /// Identifies one game from start to finish, so a result is recorded once even when
+    /// both phones report it.
+    public var id: UUID
     public var setup: PawnSetup
     public var pawns: [Pawn]
     public var turn: TurnState
@@ -178,6 +181,7 @@ public struct GameState: Hashable, Codable, Sendable {
     public var version: Int
 
     public init(setup: PawnSetup) {
+        self.id = UUID()
         self.setup = setup
         self.pawns = setup.allColors.flatMap { color in
             (0..<Board.pawnsPerColor).map { Pawn(id: PawnID(color: color, index: $0)) }

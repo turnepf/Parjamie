@@ -46,6 +46,13 @@ public final class MatchSession {
     public private(set) var peerName: String?
     public private(set) var discovered: [Peer] = []
     public private(set) var lastOutcome: MoveOutcome?
+    /// Names for each seat when both players share this phone, in seat order.
+    public private(set) var localPlayerNames: [String] = []
+
+    /// Supplies the finished games to share with the other phone after connecting.
+    public var scoreboardRecords: @MainActor () -> [GameRecord] = { [] }
+    /// Receives the other phone's finished games.
+    public var onScoreboardReceived: @MainActor ([GameRecord]) -> Void = { _ in }
 
     /// The player's own name, shown to the other device. Set it before hosting or joining.
     public var displayName: String
@@ -81,8 +88,9 @@ public final class MatchSession {
     // MARK: Starting a match
 
     /// Play both seats on this device. Useful for checking the board before Jamie is around.
-    public func startLocalGame(setup: PawnSetup) {
+    public func startLocalGame(setup: PawnSetup, names: [String] = []) {
         stop()
+        localPlayerNames = names
         role = .local
         mySeat = .one
         game = GameState(setup: setup)
@@ -267,6 +275,7 @@ public final class MatchSession {
             let current = game ?? GameState(setup: .oneColorEach)
             game = current
             link?.send(.welcome(Welcome(displayName: displayName, seat: .two, state: current)))
+            link?.send(.scoreboard(scoreboardRecords()))
             beginHeartbeat()
 
         case .requestRoll:
@@ -288,6 +297,9 @@ public final class MatchSession {
             lastOutcome = nil
             broadcast()
 
+        case .scoreboard(let records):
+            onScoreboardReceived(records)
+
         case .ping:
             link?.send(.pong)
 
@@ -308,6 +320,7 @@ public final class MatchSession {
             peerName = welcome.displayName
             game = welcome.state
             status = .playing
+            link?.send(.scoreboard(scoreboardRecords()))
             reconnectLoop?.cancel()
             reconnectLoop = nil
             beginHeartbeat()
@@ -327,6 +340,9 @@ public final class MatchSession {
             case .gameInProgress:
                 status = .lost("That game already has two players.")
             }
+
+        case .scoreboard(let records):
+            onScoreboardReceived(records)
 
         case .ping:
             link?.send(.pong)

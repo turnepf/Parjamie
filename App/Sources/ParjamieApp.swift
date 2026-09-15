@@ -6,11 +6,19 @@ struct ParjamieApp: App {
     @State private var session = MatchSession(
         displayName: UserDefaults.standard.string(forKey: PlayerName.key) ?? ""
     )
+    @State private var scoreboard = ScoreboardStore()
 
     var body: some Scene {
         WindowGroup {
             RootView(session: session)
+                .environment(scoreboard)
                 .preferredColorScheme(.light)
+                .onAppear {
+                    ShopSounds.shared.warmUp()
+                    // The two phones swap finished games whenever they connect.
+                    session.scoreboardRecords = { [scoreboard] in scoreboard.scoreboard.records }
+                    session.onScoreboardReceived = { [scoreboard] in scoreboard.merge($0) }
+                }
         }
     }
 }
@@ -18,6 +26,11 @@ struct ParjamieApp: App {
 /// iOS reports every phone as just "iPhone", so players type their own name once.
 enum PlayerName {
     static let key = "playerName"
+}
+
+/// The name last used for the second player on a shared phone.
+enum SecondPlayerName {
+    static let key = "secondPlayerName"
 }
 
 /// Turn-by-turn coaching for people learning the game. On unless the player turns it off.

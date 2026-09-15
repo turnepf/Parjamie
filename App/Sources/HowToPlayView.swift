@@ -68,10 +68,10 @@ struct HowToPlayView: View {
                 section(title: "What the squares mean") {
                     keyRow(sample: { StartSquareSample(color: myColors.first ?? .red) },
                            title: "Colored square with an X",
-                           text: "A start square. That color's helmets come onto the board here. It's also a safe square.")
+                           text: "A start square. That color's helmets come onto the board here. Its purple frame means it's also a safe square.")
                     keyRow(sample: { SafeSquareSample() },
-                           title: "Plain square with an X",
-                           text: "A safe square. A helmet sitting here can't be captured. Any color can use it. You never need to land on your own color.")
+                           title: "Purple square with an X",
+                           text: "A safe square. A helmet sitting here can't be captured, and gets a purple shield so you can tell. Any color can use it. You never need to land on your own color.")
                     keyRow(sample: { HomeRowSample(color: myColors.first ?? .red) },
                            title: "Painted row with arrows",
                            text: "A home row. Only helmets of that color can go up it, to the middle.")
@@ -83,7 +83,7 @@ struct HowToPlayView: View {
                 section(title: "Capturing") {
                     Text("Land exactly on the other player's helmet and it gets sent back to its bay. You earn **+20** squares to spend on one of your helmets.")
                         .modifier(GuideText())
-                    Text("A helmet on a safe square (any X) is protected. You can't land on it at all. The one exception: bringing a helmet out onto your own start square bumps anyone sitting there.")
+                    Text("A helmet on a safe square (purple, or any X) is protected. You can't land on it at all. The one exception: bringing a helmet out onto your own start square bumps anyone sitting there.")
                         .modifier(GuideText())
                 }
 
@@ -191,6 +191,7 @@ private struct StartSquareSample: View {
     var body: some View {
         ZStack {
             PlateSquare(paint: Palette.color(color))
+            Rectangle().stroke(Palette.safe, lineWidth: 6).padding(5)
             Canvas { context, size in
                 BoardView.drawTackWeld(in: CGRect(origin: .zero, size: size), in: &context, unit: size.width)
             }
@@ -201,7 +202,7 @@ private struct StartSquareSample: View {
 private struct SafeSquareSample: View {
     var body: some View {
         ZStack {
-            PlateSquare()
+            PlateSquare(paint: Palette.safe)
             Canvas { context, size in
                 BoardView.drawTackWeld(in: CGRect(origin: .zero, size: size), in: &context, unit: size.width)
             }

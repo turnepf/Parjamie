@@ -9,7 +9,9 @@ final class FramingTests: XCTestCase {
         .requestRoll,
         .snapshot(GameState(setup: .twoColorsEach)),
         .requestMove(.advance(pawn: PawnID(color: .red, index: 2), spending: 3)),
-        .ping
+        .ping,
+        .scoreboard([GameRecord(id: UUID(), finishedAt: Date(timeIntervalSince1970: 1_800_000_000), setup: .oneColorEach,
+                                players: ["Jamie", "Fiona"], winner: "Fiona", onePhone: false)])
     ]
 
     func testEachMessageSurvivesARoundTrip() throws {
