@@ -56,8 +56,8 @@ extension PawnSetup {
 
     var detail: String {
         switch self {
-        case .oneColorEach: "Four pawns apiece. A quicker game."
-        case .twoColorsEach: "Eight pawns apiece. The longer, tactical game."
+        case .oneColorEach: "Four pawns each. Quicker."
+        case .twoColorsEach: "Eight pawns each. Longer."
         }
     }
 }

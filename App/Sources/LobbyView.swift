@@ -72,12 +72,13 @@ struct LobbyView: View {
         }
     }
 
-    /// Everything on the start screen, allowed to scroll on shorter phones.
+    /// Everything on the start screen. It fits a phone without scrolling at the usual text
+    /// sizes; the scroll view is only a fallback for very large text.
     private var content: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: 16)
+            Spacer(minLength: 8)
             title
-            Spacer(minLength: 20)
+            Spacer(minLength: 14)
 
             switch session.status {
             case .idle:
@@ -92,46 +93,45 @@ struct LobbyView: View {
                 ProgressView().tint(Palette.arc)
             }
 
-            Spacer(minLength: 16)
+            Spacer(minLength: 8)
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 20)
         // Keep the controls a comfortable width on iPad and Mac.
         .frame(maxWidth: 520)
         .frame(maxWidth: .infinity)
     }
 
     private var title: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 4) {
             ZStack {
                 Circle()
-                    .fill(.radialGradient(colors: [Palette.arc.opacity(0.55), .clear], center: .center, startRadius: 0, endRadius: 46))
-                    .frame(width: 92, height: 92)
-                    .offset(x: 18, y: 16)
+                    .fill(.radialGradient(colors: [Palette.arc.opacity(0.55), .clear], center: .center, startRadius: 0, endRadius: 36))
+                    .frame(width: 72, height: 72)
+                    .offset(x: 14, y: 12)
                 HelmetShape(tint: Palette.color(.red), lensLit: true)
-                    .frame(width: 58, height: 58)
+                    .frame(width: 44, height: 44)
                     .shadow(color: .black.opacity(0.5), radius: 6, y: 4)
             }
-            .frame(height: 64)
+            .frame(height: 48)
             Text("PARJAMIE")
-                .font(.rounded(38, .black))
+                .font(.rounded(32, .black))
                 .tracking(3)
                 .foregroundStyle(.linearGradient(colors: [Color(white: 0.97), Color(white: 0.7)], startPoint: .top, endPoint: .bottom))
                 .shadow(color: .black.opacity(0.6), radius: 0, y: 2)
             WeldBead()
-                .frame(width: 180, height: 7)
+                .frame(width: 160, height: 6)
             Text("The race home, for two")
-                .font(.rounded(14, .semibold))
+                .font(.rounded(13, .semibold))
                 .tracking(1.5)
                 .foregroundStyle(Palette.arc)
-                .padding(.top, 2)
         }
     }
 
     // MARK: Choosing a game
 
     private var start: some View {
-        VStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
+        VStack(spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
                 sectionLabel("Your name")
                 TextField("", text: $playerName, prompt: Text("So the other player knows it's you").foregroundStyle(.white.opacity(0.35)))
                     .font(.rounded(17, .semibold))
@@ -142,7 +142,8 @@ struct LobbyView: View {
                     .autocorrectionDisabled()
                     .submitLabel(.done)
                     .focused($nameFocused)
-                    .padding(14)
+                    .padding(.vertical, 11)
+                    .padding(.horizontal, 14)
                     .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(.black.opacity(0.4)))
                     .overlay(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -150,25 +151,24 @@ struct LobbyView: View {
                     )
             }
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 sectionLabel("Pawns")
-                ForEach(PawnSetup.allCases, id: \.self) { option in
-                    setupRow(option)
+                HStack(spacing: 10) {
+                    ForEach(PawnSetup.allCases, id: \.self) { option in
+                        setupTile(option)
+                    }
                 }
                 houseRulesButton
             }
 
-            VStack(spacing: 12) {
-                settingToggle("Show hints", detail: "Step-by-step help on each turn while you learn.", isOn: $showHints)
-                settingToggle("Shop sounds", detail: "Arc crackle and sparks. The silent switch mutes them too.", isOn: $playSounds)
+            HStack(spacing: 10) {
+                settingToggle("Hints", systemImage: "lightbulb.fill", isOn: $showHints)
+                settingToggle("Sound", systemImage: "speaker.wave.2.fill", isOn: $playSounds)
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 14)
-            .steelPlate()
 
-            VStack(spacing: 12) {
+            VStack(spacing: 10) {
                 // Two phones: one hosts, the other joins.
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     primary("Host a game") {
                         session.displayName = trimmedName
                         session.startHosting(setup: setup, rules: houseRules.wrappedValue)
@@ -180,7 +180,7 @@ struct LobbyView: View {
                 }
                 .disabled(trimmedName.isEmpty)
                 .opacity(trimmedName.isEmpty ? 0.4 : 1)
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     secondary("Together", systemImage: "iphone") {
                         showOnePhone = true
                     }
@@ -188,21 +188,14 @@ struct LobbyView: View {
                         showComputer = true
                     }
                 }
-                HStack(spacing: 26) {
-                    Button {
+                HStack(spacing: 10) {
+                    secondary("Scoreboard", systemImage: "list.number", compact: true) {
                         showScoreboard = true
-                    } label: {
-                        Label("Scoreboard", systemImage: "list.number")
                     }
-                    Button {
+                    secondary("How to play", systemImage: "questionmark.circle", compact: true) {
                         showHowToPlay = true
-                    } label: {
-                        Label("How to play", systemImage: "questionmark.circle")
                     }
                 }
-                .font(.rounded(15, .medium))
-                .foregroundStyle(.white.opacity(0.6))
-                .padding(.top, 2)
             }
         }
     }
@@ -216,7 +209,7 @@ struct LobbyView: View {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(Palette.arc)
-                    .frame(width: 34)
+                    .frame(width: 26)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("House rules")
                         .font(.rounded(16, .semibold))
@@ -229,7 +222,7 @@ struct LobbyView: View {
                 Image(systemName: "chevron.right")
                     .foregroundStyle(.white.opacity(0.4))
             }
-            .padding(.vertical, 12)
+            .padding(.vertical, 9)
             .padding(.horizontal, 14)
             .steelPlate(highlighted: changed > 0)
         }
@@ -244,50 +237,58 @@ struct LobbyView: View {
             .padding(.leading, 2)
     }
 
-    private func settingToggle(_ title: String, detail: String, isOn: Binding<Bool>) -> some View {
+    private func settingToggle(_ title: String, systemImage: String, isOn: Binding<Bool>) -> some View {
         Toggle(isOn: isOn) {
-            VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 6) {
+                Image(systemName: systemImage)
+                    .foregroundStyle(Palette.arc)
                 Text(title)
-                    .font(.rounded(16, .semibold))
-                    .foregroundStyle(.white)
-                Text(detail)
-                    .font(.rounded(12))
-                    .foregroundStyle(.white.opacity(0.5))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
             }
+            .font(.rounded(16, .semibold))
+            .foregroundStyle(.white)
+            .accessibilityElement(children: .combine)
         }
         .tint(Palette.arc)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 14)
+        .steelPlate()
     }
 
-    private func setupRow(_ option: PawnSetup) -> some View {
+    private func setupTile(_ option: PawnSetup) -> some View {
         let chosen = setup == option
         return Button {
             setup = option
         } label: {
-            HStack(spacing: 14) {
-                // A little helmet lens stands in for the radio button, lit when chosen.
-                RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .fill(chosen
-                          ? AnyShapeStyle(.linearGradient(colors: [Color(red: 1, green: 0.95, blue: 0.7), Palette.arc], startPoint: .leading, endPoint: .trailing))
-                          : AnyShapeStyle(Color(red: 0.06, green: 0.12, blue: 0.09)))
-                    .frame(width: 26, height: 12)
-                    .padding(4)
-                    .background(RoundedRectangle(cornerRadius: 5, style: .continuous).fill(Color(white: 0.12)))
-                    .shadow(color: chosen ? Palette.arc.opacity(0.8) : .clear, radius: 6)
-                VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    // A little helmet lens stands in for the radio button, lit when chosen.
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(chosen
+                              ? AnyShapeStyle(.linearGradient(colors: [Color(red: 1, green: 0.95, blue: 0.7), Palette.arc], startPoint: .leading, endPoint: .trailing))
+                              : AnyShapeStyle(Color(red: 0.06, green: 0.12, blue: 0.09)))
+                        .frame(width: 18, height: 8)
+                        .padding(3)
+                        .background(RoundedRectangle(cornerRadius: 4, style: .continuous).fill(Color(white: 0.12)))
+                        .shadow(color: chosen ? Palette.arc.opacity(0.8) : .clear, radius: 6)
                     Text(option.title)
-                        .font(.rounded(16, .semibold))
+                        .font(.rounded(15, .semibold))
                         .foregroundStyle(.white)
-                    Text(option.detail)
-                        .font(.rounded(12))
-                        .foregroundStyle(.white.opacity(0.55))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
-                Spacer(minLength: 0)
+                Text(option.detail)
+                    .font(.rounded(12))
+                    .foregroundStyle(.white.opacity(0.55))
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 12)
             .steelPlate(highlighted: chosen)
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(chosen ? .isSelected : [])
     }
 
     // MARK: Connecting
@@ -372,7 +373,7 @@ struct LobbyView: View {
         Button(action: action) {
             Text(label)
                 .font(.rounded(18, .bold))
-                .frame(maxWidth: .infinity, minHeight: 54)
+                .frame(maxWidth: .infinity, minHeight: 50)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(.linearGradient(colors: [Color(red: 1, green: 0.72, blue: 0.3), Palette.arc, Color(red: 0.85, green: 0.38, blue: 0.05)],
@@ -385,14 +386,14 @@ struct LobbyView: View {
         .buttonStyle(.plain)
     }
 
-    private func secondary(_ label: String, systemImage: String? = nil, action: @escaping () -> Void) -> some View {
+    private func secondary(_ label: String, systemImage: String? = nil, compact: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 8) {
                 if let systemImage { Image(systemName: systemImage) }
                 Text(label)
             }
-                .font(.rounded(18, .semibold))
-                .frame(maxWidth: .infinity, minHeight: 54)
+                .font(.rounded(compact ? 16 : 18, .semibold))
+                .frame(maxWidth: .infinity, minHeight: compact ? 44 : 50)
                 .foregroundStyle(.white)
                 .steelPlate()
         }

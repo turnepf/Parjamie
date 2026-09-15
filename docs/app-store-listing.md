@@ -55,6 +55,6 @@ board game,dice,race,two player,pachisi,family,welding,local multiplayer,classic
 
 Parjamie is a two-player board game. Everything runs on device; there are no accounts, servers or in-app purchases.
 
-To review it on a single device, tap "Vs computer" on the start screen and choose Sparky (easy) or Torch (hard), or tap "Together" to play both sides on one device. Turn on "Show hints" (on by default) for turn-by-turn guidance.
+To review it on a single device, tap "Vs computer" on the start screen and choose Sparky (easy) or Torch (hard), or tap "Together" to play both sides on one device. Turn on "Hints" (on by default) for turn-by-turn guidance.
 
 Two-device play uses Bonjour on the local network: on one device tap "Host a game", on the other tap "Join a game" and pick the host. The Local Network permission prompt is used only to find the other player's device.
