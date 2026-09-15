@@ -1,0 +1,34 @@
+:root {
+  --floor: #16181b;
+  --plate: #26292e;
+  --edge: rgba(255,255,255,.12);
+  --text: #f2f2f0;
+  --muted: rgba(242,242,240,.7);
+  --arc: #ff8f1f;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0 16px;
+  background: radial-gradient(circle at 70% 0%, rgba(255,143,31,.14), transparent 55%), linear-gradient(160deg, #202226, var(--floor));
+  background-attachment: fixed;
+  color: var(--text);
+  font: 17px/1.55 ui-rounded, -apple-system, "SF Pro Rounded", "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+}
+main { max-width: 720px; margin: 0 auto; padding: 48px 0 64px; }
+header { text-align: center; margin-bottom: 32px; }
+header img { width: 112px; height: 112px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+h1 { font-size: 40px; letter-spacing: 3px; margin: 18px 0 4px; }
+.tagline { color: var(--arc); font-weight: 600; letter-spacing: 1px; margin: 0; }
+.bead { height: 6px; width: 160px; margin: 14px auto 0; border-radius: 3px;
+  background: repeating-linear-gradient(90deg, #d9d4cc 0 5px, #6d655e 5px 8px); }
+section { background: linear-gradient(#2c2f34, #1f2226); border: 1px solid var(--edge); border-radius: 14px; padding: 20px 22px; margin: 18px 0; }
+h2 { font: 700 13px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: 2px; text-transform: uppercase; color: var(--arc); margin: 0 0 12px; }
+p, li { color: var(--muted); }
+strong { color: var(--text); }
+a { color: var(--arc); }
+ul { padding-left: 20px; }
+footer { text-align: center; color: rgba(242,242,240,.45); font-size: 14px; margin-top: 28px; }
+nav { text-align: center; margin-top: 10px; }
+nav a { margin: 0 10px; }
