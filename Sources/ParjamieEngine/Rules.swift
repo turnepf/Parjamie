@@ -123,7 +123,7 @@ public enum Rules {
             // A player's own helmets, in either of their colors, may share a square.
             if state.seat(owning: other.color) == state.seat(owning: pawn.color) { return landing }
             // Safety squares shelter their occupant from being bumped.
-            return Board.isSafety(ring: index) ? nil : landing
+            return state.isSafe(ring: index) ? nil : landing
         case .homeColumn(let step):
             let taken = state.pawns.contains {
                 $0.color == pawn.color && $0.id != pawn.id && $0.position == .homeColumn(step)

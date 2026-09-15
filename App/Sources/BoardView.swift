@@ -253,7 +253,7 @@ struct BoardView: View {
             context.fill(Path(box.insetBy(dx: unit * 0.05, dy: unit * 0.05)), with: .color(Palette.color(owner).opacity(0.9)))
             context.stroke(Path(box.insetBy(dx: unit * 0.1, dy: unit * 0.1)), with: .color(Palette.safe), lineWidth: unit * 0.12)
             Self.drawTackWeld(in: box, in: &context, unit: unit)
-        } else if Board.isSafety(ring: index) {
+        } else if game.isSafe(ring: index) {
             context.fill(Path(box.insetBy(dx: unit * 0.05, dy: unit * 0.05)), with: .linearGradient(
                 Gradient(colors: [Palette.safe.opacity(0.95), Palette.safe.opacity(0.7)]),
                 startPoint: CGPoint(x: box.minX, y: box.minY), endPoint: CGPoint(x: box.maxX, y: box.maxY)
@@ -400,7 +400,7 @@ struct BoardView: View {
                 Canvas { context, _ in
                     var arrows = Path()
                     for index in 0..<Board.ringLength
-                    where !Board.isSafety(ring: index) {
+                    where !game.isSafe(ring: index) {
                         let here = BoardGeometry.cell(ring: index)
                         let next = BoardGeometry.cell(ring: index + 1)
                         let dx = CGFloat(next.column - here.column), dy = CGFloat(next.row - here.row)
@@ -454,7 +454,7 @@ struct BoardView: View {
     // MARK: Placement
 
     private func isOnSafeSquare(_ pawn: Pawn) -> Bool {
-        if case .ring(let index) = pawn.position { return Board.isSafety(ring: index) }
+        if case .ring(let index) = pawn.position { return game.isSafe(ring: index) }
         return false
     }
 

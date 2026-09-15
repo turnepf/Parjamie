@@ -175,14 +175,17 @@ public struct GameState: Hashable, Codable, Sendable {
     /// both phones report it.
     public var id: UUID
     public var setup: PawnSetup
+    /// Ring squares where a pawn cannot be captured. Classic unless the host shuffled them.
+    public var safeSquares: Set<Int>
     public var pawns: [Pawn]
     public var turn: TurnState
     public var winner: Seat?
     public var version: Int
 
-    public init(setup: PawnSetup) {
+    public init(setup: PawnSetup, safetyOffsets: Set<Int> = Board.safetyOffsets) {
         self.id = UUID()
         self.setup = setup
+        self.safeSquares = Board.safeSquares(offsets: safetyOffsets)
         self.pawns = setup.allColors.flatMap { color in
             (0..<Board.pawnsPerColor).map { Pawn(id: PawnID(color: color, index: $0)) }
         }
@@ -206,6 +209,15 @@ public struct GameState: Hashable, Codable, Sendable {
 
     public func pawns(onRing index: Int) -> [Pawn] {
         pawns.filter { $0.position == .ring(index) }
+    }
+
+    public func isSafe(ring index: Int) -> Bool {
+        safeSquares.contains(((index % Board.ringLength) + Board.ringLength) % Board.ringLength)
+    }
+
+    /// Whether this game moved the safe spots away from the classic layout.
+    public var hasShuffledSafeSpots: Bool {
+        safeSquares != Board.safeSquares(offsets: Board.safetyOffsets)
     }
 
     /// Two pawns of one color on a square block every pawn, including their own.

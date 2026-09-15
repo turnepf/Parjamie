@@ -206,6 +206,32 @@ final class RulesTests: XCTestCase {
         XCTAssertNil(Rules.apply(.advance(pawn: red(0), spending: 42), to: &game))
     }
 
+    // MARK: Shuffled safe spots
+
+    func testMovedSafeSpotShieldsAPawnAndTheOldOneNoLongerDoes() {
+        // Move the safe spots from offsets 4 and 11 to 6 and 12.
+        var game = state(placing: [(red(0), afterRed(0)), (blue(0), afterRed(3))], values: [3, 1])
+        game.safeSquares = Board.safeSquares(offsets: [6, 12, 16])
+        guard case .ring(let target) = afterRed(3) else { return XCTFail("expected a ring square") }
+        let shielded = game.isSafe(ring: target)
+        XCTAssertEqual(Rules.destination(for: game[red(0)]!, advancing: 3, in: game) == nil, shielded)
+
+        // Pick a square that is safe classically but not in this layout, and one that is
+        // safe only here.
+        let classicOnly = (0..<Board.ringLength).first { Board.isSafety(ring: $0) && !game.isSafe(ring: $0) }!
+        let newOnly = (0..<Board.ringLength).first { !Board.isSafety(ring: $0) && game.isSafe(ring: $0) }!
+        XCTAssertTrue(game.hasShuffledSafeSpots)
+        for (square, shouldBlock) in [(classicOnly, false), (newOnly, true)] {
+            var probe = state(values: [1, 2])
+            probe.safeSquares = game.safeSquares
+            let from = (square - 1 + Board.ringLength) % Board.ringLength
+            probe.pawns[probe.pawns.firstIndex { $0.id == red(0) }!].position = .ring(from)
+            probe.pawns[probe.pawns.firstIndex { $0.id == blue(0) }!].position = .ring(square)
+            let landing = Rules.destination(for: probe[red(0)]!, advancing: 1, in: probe)
+            XCTAssertEqual(landing == nil, shouldBlock, "square \(square)")
+        }
+    }
+
     // MARK: Two colors each
 
     func testYourOtherColorIsNeverCaptured() throws {

@@ -71,7 +71,7 @@ struct HowToPlayView: View {
                            text: "A start square. That color's helmets come onto the board here. Its purple frame means it's also a safe square.")
                     keyRow(sample: { SafeSquareSample() },
                            title: "Purple square with an X",
-                           text: "A safe square. A helmet sitting here can't be captured, and gets a purple shield so you can tell. Any color can use it. You never need to land on your own color.")
+                           text: "A safe square. A helmet sitting here can't be captured, and gets a purple shield so you can tell. Any color can use it. You never need to land on your own color. With Shuffle safe spots on, they move to new places each game, the same for both players.")
                     keyRow(sample: { HomeRowSample(color: myColors.first ?? .red) },
                            title: "Painted row with arrows",
                            text: "A home row. Only helmets of that color can go up it, to the middle.")

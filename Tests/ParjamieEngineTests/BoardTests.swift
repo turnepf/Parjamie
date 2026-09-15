@@ -139,4 +139,28 @@ final class BoardGeometryTests: XCTestCase {
             XCTAssertTrue(touches, "\(color) enters the board away from its nest")
         }
     }
+
+    // MARK: Shuffled safe spots
+
+    func testShuffledSafeSpotsAreFairAndKeepStartSquaresSafe() {
+        var generator = SystemRandomNumberGenerator()
+        for _ in 0..<200 {
+            let offsets = Board.shuffledSafetyOffsets(using: &generator)
+            XCTAssertEqual(offsets.count, 3)
+            XCTAssertTrue(offsets.contains(16), "start squares stay safe")
+            XCTAssertFalse(offsets.contains(8), "never on the tip where a color turns for home")
+            XCTAssertFalse(offsets.contains(0) || offsets.contains(15), "never touching the center")
+            let moved = offsets.subtracting([16]).sorted()
+            XCTAssertGreaterThanOrEqual(moved[1] - moved[0], 3)
+
+            let squares = Board.safeSquares(offsets: offsets)
+            XCTAssertEqual(squares.count, 12)
+            // Every color has the same safe spots relative to its own start.
+            let relative = { (color: PlayerColor) in
+                Set(squares.map { Board.progress(ofRing: $0, for: color) })
+            }
+            XCTAssertEqual(relative(.red), relative(.yellow))
+            XCTAssertEqual(relative(.red), relative(.blue))
+        }
+    }
 }

@@ -49,11 +49,34 @@ public enum Board {
         (entryIndex(for: color) + homeEntryProgress) % ringLength
     }
 
-    /// Offsets within each arm that are safety squares. Offset 16 is the entry square.
+    /// Offsets within each arm that are safety squares in the classic layout. Offset 16 is
+    /// the entry square.
     public static let safetyOffsets: Set<Int> = [4, 11, 16]
 
+    /// Whether a square is safe in the classic layout. A game with shuffled safe spots
+    /// asks `GameState.isSafe(ring:)` instead.
     public static func isSafety(ring index: Int) -> Bool {
         safetyOffsets.contains(index % armLength)
+    }
+
+    /// Ring squares that are safe when every arm uses the same offsets.
+    public static func safeSquares(offsets: Set<Int>) -> Set<Int> {
+        Set((0..<ringLength).filter { offsets.contains($0 % armLength) })
+    }
+
+    /// A fresh layout of safe spots for the shuffled-safe-spots option.
+    ///
+    /// Two squares per arm move to new places, and every arm gets the same pair, so each
+    /// player finds the same shelter at the same distance from their start. Start squares
+    /// stay safe. The arm's tip, where a color turns for home, and the squares touching
+    /// the center are left out so safe spots never crowd the corners.
+    public static func shuffledSafetyOffsets<G: RandomNumberGenerator>(using generator: inout G) -> Set<Int> {
+        let candidates = Array(1...7) + Array(9...14)
+        while true {
+            let first = candidates.randomElement(using: &generator)!
+            let second = candidates.randomElement(using: &generator)!
+            if abs(first - second) >= 3 { return [first, second, entryOffsetInArm] }
+        }
     }
 
     public static func isEntry(ring index: Int) -> Bool {

@@ -13,12 +13,37 @@ struct LobbyView: View {
     @State private var showScoreboard = false
     @State private var showOnePhone = false
     @AppStorage(SecondPlayerName.key) private var secondName = ""
+    @AppStorage(ShuffleSafeSpotsSetting.key) private var shuffleSafeSpots = false
 
     private var trimmedName: String {
         playerName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     var body: some View {
+        GeometryReader { proxy in
+            ScrollView {
+                content
+                    .frame(minHeight: proxy.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollDismissesKeyboard(.interactively)
+        }
+        .background { ShopBackdrop().ignoresSafeArea() }
+        .preferredColorScheme(.dark)
+        .animation(.easeInOut(duration: 0.2), value: session.discovered)
+        .sheet(isPresented: $showHowToPlay) { HowToPlayView() }
+        .sheet(isPresented: $showScoreboard) { ScoreboardView() }
+        .sheet(isPresented: $showOnePhone) {
+            OnePhoneSetupView(firstName: $playerName, secondName: $secondName, setup: setup) { names in
+                showOnePhone = false
+                session.startLocalGame(setup: setup, names: names, shuffleSafeSpots: shuffleSafeSpots)
+            }
+            .presentationDetents([.medium])
+        }
+    }
+
+    /// Everything on the start screen, allowed to scroll on shorter phones.
+    private var content: some View {
         VStack(spacing: 0) {
             Spacer(minLength: 16)
             title
@@ -40,18 +65,6 @@ struct LobbyView: View {
             Spacer(minLength: 16)
         }
         .padding(.horizontal, 24)
-        .background { ShopBackdrop().ignoresSafeArea() }
-        .preferredColorScheme(.dark)
-        .animation(.easeInOut(duration: 0.2), value: session.discovered)
-        .sheet(isPresented: $showHowToPlay) { HowToPlayView() }
-        .sheet(isPresented: $showScoreboard) { ScoreboardView() }
-        .sheet(isPresented: $showOnePhone) {
-            OnePhoneSetupView(firstName: $playerName, secondName: $secondName, setup: setup) { names in
-                showOnePhone = false
-                session.startLocalGame(setup: setup, names: names)
-            }
-            .presentationDetents([.medium])
-        }
     }
 
     private var title: some View {
@@ -84,7 +97,7 @@ struct LobbyView: View {
     // MARK: Choosing a game
 
     private var start: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
                 sectionLabel("Your name")
                 TextField("", text: $playerName, prompt: Text("So the other player knows it's you").foregroundStyle(.white.opacity(0.35)))
@@ -114,6 +127,7 @@ struct LobbyView: View {
             VStack(spacing: 12) {
                 settingToggle("Show hints", detail: "Step-by-step help on each turn while you learn.", isOn: $showHints)
                 settingToggle("Shop sounds", detail: "Arc crackle and sparks. The silent switch mutes them too.", isOn: $playSounds)
+                settingToggle("Shuffle safe spots", detail: "Purple safe squares move to new places each game, the same for both players.", isOn: $shuffleSafeSpots)
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 14)
@@ -124,7 +138,7 @@ struct LobbyView: View {
                 HStack(spacing: 12) {
                     primary("Host a game") {
                         session.displayName = trimmedName
-                        session.startHosting(setup: setup)
+                        session.startHosting(setup: setup, shuffleSafeSpots: shuffleSafeSpots)
                     }
                     secondary("Join a game") {
                         session.displayName = trimmedName

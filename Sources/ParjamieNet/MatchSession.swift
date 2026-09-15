@@ -46,6 +46,10 @@ public final class MatchSession {
     public private(set) var peerName: String?
     public private(set) var discovered: [Peer] = []
     public private(set) var lastOutcome: MoveOutcome?
+    /// Whether new games on this phone move the safe spots. The host's choice decides a
+    /// two-phone game, including rematches the guest asks for.
+    public private(set) var shuffleSafeSpots = false
+
     /// Names for each seat when both players share this phone, in seat order.
     public private(set) var localPlayerNames: [String] = []
 
@@ -88,20 +92,22 @@ public final class MatchSession {
     // MARK: Starting a match
 
     /// Play both seats on this device. Useful for checking the board before Jamie is around.
-    public func startLocalGame(setup: PawnSetup, names: [String] = []) {
+    public func startLocalGame(setup: PawnSetup, names: [String] = [], shuffleSafeSpots: Bool = false) {
         stop()
         localPlayerNames = names
+        self.shuffleSafeSpots = shuffleSafeSpots
         role = .local
         mySeat = .one
-        game = GameState(setup: setup)
+        game = Self.newGame(setup: setup, shuffleSafeSpots: shuffleSafeSpots)
         status = .playing
     }
 
-    public func startHosting(setup: PawnSetup) {
+    public func startHosting(setup: PawnSetup, shuffleSafeSpots: Bool = false) {
         stop()
+        self.shuffleSafeSpots = shuffleSafeSpots
         role = .host
         mySeat = .one
-        game = GameState(setup: setup)
+        game = Self.newGame(setup: setup, shuffleSafeSpots: shuffleSafeSpots)
         status = .waitingForPlayer
         startListener()
     }
@@ -254,9 +260,15 @@ public final class MatchSession {
     /// A new board whose version keeps counting up from the old game, because the guest
     /// ignores any snapshot older than the one it already has.
     private func freshGame(setup: PawnSetup) -> GameState {
-        var fresh = GameState(setup: setup)
+        var fresh = Self.newGame(setup: setup, shuffleSafeSpots: shuffleSafeSpots)
         fresh.version = (game?.version ?? 0) + 1
         return fresh
+    }
+
+    private static func newGame(setup: PawnSetup, shuffleSafeSpots: Bool) -> GameState {
+        guard shuffleSafeSpots else { return GameState(setup: setup) }
+        var generator = SystemRandomNumberGenerator()
+        return GameState(setup: setup, safetyOffsets: Board.shuffledSafetyOffsets(using: &generator))
     }
 
     // MARK: Message handling

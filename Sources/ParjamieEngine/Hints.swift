@@ -30,7 +30,8 @@ public enum Hints {
         let pawns = state.pawns(for: state.turn.seat)
         let noneInPlay = pawns.allSatisfy { $0.isInNest || $0.isHome }
         if noneInPlay {
-            return "Tap Strike an arc to roll. To bring a helmet out of your bay you need a 5: one die showing 5, or both dice adding up to 5."
+            let shuffled = state.hasShuffledSafeSpots ? " Safe spots are shuffled this game, so look for the purple squares." : ""
+            return "Tap Strike an arc to roll. To bring a helmet out of your bay you need a 5: one die showing 5, or both dice adding up to 5." + shuffled
         }
         return "Tap Strike an arc to roll the dice."
     }
