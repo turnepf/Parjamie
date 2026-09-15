@@ -13,7 +13,15 @@ struct LobbyView: View {
     @State private var showScoreboard = false
     @State private var showOnePhone = false
     @AppStorage(SecondPlayerName.key) private var secondName = ""
-    @AppStorage(ShuffleSafeSpotsSetting.key) private var shuffleSafeSpots = false
+    @AppStorage(HouseRulesSetting.key) private var houseRulesRaw = ""
+    @State private var showHouseRules = false
+
+    private var houseRules: Binding<HouseRules> {
+        Binding(
+            get: { HouseRulesSetting.decode(houseRulesRaw) },
+            set: { houseRulesRaw = HouseRulesSetting.encode($0) }
+        )
+    }
 
     private var trimmedName: String {
         playerName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -33,10 +41,11 @@ struct LobbyView: View {
         .animation(.easeInOut(duration: 0.2), value: session.discovered)
         .sheet(isPresented: $showHowToPlay) { HowToPlayView() }
         .sheet(isPresented: $showScoreboard) { ScoreboardView() }
+        .sheet(isPresented: $showHouseRules) { HouseRulesView(rules: houseRules) }
         .sheet(isPresented: $showOnePhone) {
             OnePhoneSetupView(firstName: $playerName, secondName: $secondName, setup: setup) { names in
                 showOnePhone = false
-                session.startLocalGame(setup: setup, names: names, shuffleSafeSpots: shuffleSafeSpots)
+                session.startLocalGame(setup: setup, names: names, rules: houseRules.wrappedValue)
             }
             .presentationDetents([.medium])
         }
@@ -122,12 +131,12 @@ struct LobbyView: View {
                 ForEach(PawnSetup.allCases, id: \.self) { option in
                     setupRow(option)
                 }
+                houseRulesButton
             }
 
             VStack(spacing: 12) {
                 settingToggle("Show hints", detail: "Step-by-step help on each turn while you learn.", isOn: $showHints)
                 settingToggle("Shop sounds", detail: "Arc crackle and sparks. The silent switch mutes them too.", isOn: $playSounds)
-                settingToggle("Shuffle safe spots", detail: "Purple safe squares move to new places each game, the same for both players.", isOn: $shuffleSafeSpots)
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 14)
@@ -138,7 +147,7 @@ struct LobbyView: View {
                 HStack(spacing: 12) {
                     primary("Host a game") {
                         session.displayName = trimmedName
-                        session.startHosting(setup: setup, shuffleSafeSpots: shuffleSafeSpots)
+                        session.startHosting(setup: setup, rules: houseRules.wrappedValue)
                     }
                     secondary("Join a game") {
                         session.displayName = trimmedName
@@ -167,6 +176,35 @@ struct LobbyView: View {
                 .padding(.top, 2)
             }
         }
+    }
+
+    private var houseRulesButton: some View {
+        let changed = houseRules.wrappedValue.changedCount
+        return Button {
+            showHouseRules = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Palette.arc)
+                    .frame(width: 34)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("House rules")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text(changed == 0 ? "Classic rules" : "\(changed) \(changed == 1 ? "rule" : "rules") changed")
+                        .font(.system(size: 12, design: .rounded))
+                        .foregroundStyle(changed == 0 ? .white.opacity(0.55) : Palette.arc)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(.white.opacity(0.4))
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
+            .steelPlate(highlighted: changed > 0)
+        }
+        .buttonStyle(.plain)
     }
 
     private func sectionLabel(_ text: String) -> some View {

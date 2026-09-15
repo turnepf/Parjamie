@@ -18,6 +18,7 @@ struct GameView: View {
     @State private var nudgeTask: Task<Void, Never>?
     @State private var showHowToPlay = false
     @State private var showScoreboard = false
+    @State private var showRules = false
     @Environment(ScoreboardStore.self) private var scoreboardStore
     @AppStorage(HowToPlaySetting.seenKey) private var seenHowToPlay = false
 
@@ -36,9 +37,13 @@ struct GameView: View {
                 .sheet(isPresented: $showHowToPlay) {
                     HowToPlayView(
                         myColors: myColors(game),
+                        rules: game.rules,
                         isLocal: session.role == .local,
                         otherName: session.peerName
                     )
+                }
+                .sheet(isPresented: $showRules) {
+                    HouseRulesView(rules: .constant(game.rules), editable: false)
                 }
                 .sheet(isPresented: $showScoreboard) {
                     ScoreboardView(highlight: [playerName(of: .one, in: game), playerName(of: .two, in: game)])
@@ -126,7 +131,20 @@ struct GameView: View {
                 Text(turnHeadline(game))
                     .font(.system(size: 20, weight: .semibold, design: .rounded))
                     .foregroundStyle(Palette.ink)
-                identityBadge(game)
+                HStack(spacing: 6) {
+                    identityBadge(game)
+                    if !game.rules.isClassic {
+                        Button { showRules = true } label: {
+                            Label("House rules", systemImage: "slider.horizontal.3")
+                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                .foregroundStyle(Palette.felt)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Capsule().stroke(Palette.felt.opacity(0.5), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
                 Text(subhead(game))
                     .font(.system(size: 13, weight: .regular, design: .rounded))
                     .foregroundStyle(Palette.ink.opacity(0.55))

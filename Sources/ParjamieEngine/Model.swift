@@ -175,6 +175,8 @@ public struct GameState: Hashable, Codable, Sendable {
     /// both phones report it.
     public var id: UUID
     public var setup: PawnSetup
+    /// The house rules this game is played by.
+    public var rules: HouseRules
     /// Ring squares where a pawn cannot be captured. Classic unless the host shuffled them.
     public var safeSquares: Set<Int>
     public var pawns: [Pawn]
@@ -182,16 +184,31 @@ public struct GameState: Hashable, Codable, Sendable {
     public var winner: Seat?
     public var version: Int
 
-    public init(setup: PawnSetup, safetyOffsets: Set<Int> = Board.safetyOffsets) {
+    /// A new game. `safetyOffsets` overrides where the safe squares go; otherwise they are
+    /// classic, or shuffled when the house rules ask for it.
+    public init(setup: PawnSetup, rules: HouseRules = .classic, safetyOffsets: Set<Int>? = nil) {
         self.id = UUID()
         self.setup = setup
-        self.safeSquares = Board.safeSquares(offsets: safetyOffsets)
+        self.rules = rules
+        if let safetyOffsets {
+            self.safeSquares = Board.safeSquares(offsets: safetyOffsets)
+        } else if rules.shuffleSafeSpots {
+            var generator = SystemRandomNumberGenerator()
+            self.safeSquares = Board.safeSquares(offsets: Board.shuffledSafetyOffsets(using: &generator))
+        } else {
+            self.safeSquares = Board.safeSquares(offsets: Board.safetyOffsets)
+        }
         self.pawns = setup.allColors.flatMap { color in
             (0..<Board.pawnsPerColor).map { Pawn(id: PawnID(color: color, index: $0)) }
         }
         self.turn = TurnState()
         self.winner = nil
         self.version = 0
+        if rules.quickStart {
+            for color in setup.allColors {
+                update(PawnID(color: color, index: 0), to: .ring(Board.entryIndex(for: color)))
+            }
+        }
     }
 
     public func seat(owning color: PlayerColor) -> Seat {
@@ -222,7 +239,7 @@ public struct GameState: Hashable, Codable, Sendable {
 
     /// Two pawns of one color on a square block every pawn, including their own.
     public func isBlockade(atRing index: Int) -> Bool {
-        pawns(onRing: index).count >= 2
+        rules.blockades && pawns(onRing: index).count >= 2
     }
 
     public subscript(id: PawnID) -> Pawn? {

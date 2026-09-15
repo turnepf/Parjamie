@@ -7,7 +7,7 @@ public struct MoveOutcome: Hashable, Sendable {
     public var bonusesAwarded: [MoveValue] = []
 }
 
-/// The classic race-home rules. Every function here is pure, so the host can apply a move
+/// The race-home rules, with any house rules the game carries. Every function here is pure, so the host can apply a move
 /// and hand the resulting state to the other device with no hidden context.
 public enum Rules {
 
@@ -19,7 +19,7 @@ public enum Rules {
         state.turn.roll = roll
         if roll.isDoubles {
             state.turn.consecutiveDoubles += 1
-            if state.turn.consecutiveDoubles >= 3 {
+            if state.turn.consecutiveDoubles >= 3, state.rules.threeDoubles != .nothing {
                 applyThreeDoublesPenalty(to: &state)
                 return
             }
@@ -30,7 +30,7 @@ public enum Rules {
         // Rolling doubles with every pawn out of the nest also grants the underside of
         // each die, so the seat gets four moves instead of two.
         let everyPawnOut = state.pawns(for: state.turn.seat).allSatisfy { !$0.isInNest }
-        let amounts: [Int] = roll.isDoubles && everyPawnOut
+        let amounts: [Int] = roll.isDoubles && everyPawnOut && state.rules.doublesUseBottoms
             ? [roll.first, roll.first, 7 - roll.first, 7 - roll.first]
             : [roll.first, roll.second]
 
@@ -40,10 +40,12 @@ public enum Rules {
         resolvePhase(of: &state)
     }
 
-    /// Three doubles in a row sends the seat's farthest-along pawn back to the nest.
+    /// Three doubles in a row ends the turn, and under the classic rule also sends the
+    /// seat's farthest-along pawn back to the nest.
     static func applyThreeDoublesPenalty(to state: inout GameState) {
         let inPlay = state.pawns(for: state.turn.seat).filter { !$0.isInNest && !$0.isHome }
-        if let farthest = inPlay.max(by: { ($0.progress ?? -1) < ($1.progress ?? -1) }) {
+        if state.rules.threeDoubles == .sendBack,
+           let farthest = inPlay.max(by: { ($0.progress ?? -1) < ($1.progress ?? -1) }) {
             state.update(farthest.id, to: .nest)
         }
         state.turn.values = []
@@ -63,17 +65,24 @@ public enum Rules {
         let dice = state.turn.values.filter { $0.kind == .die }
         var moves: [Move] = []
 
-        // A pawn leaves the nest on a five, either one die showing five or both dice
-        // totalling five. Bonus moves may never be spent on entering.
-        var entryCombinations: [[Int]] = dice.filter { $0.amount == 5 }.map { [$0.id] }
+        // A pawn leaves the nest on the entry number (a five, unless the house rules
+        // change it), either one die showing it or both dice totalling it. Bonus moves may
+        // never be spent on entering.
+        let faces = state.rules.entryFaces
+        let total = state.rules.entryTotal
+        var entryCombinations: [[Int]] = dice.filter { faces.contains($0.amount) }.map { [$0.id] }
         for i in dice.indices {
-            for j in dice.indices where j > i && dice[i].amount + dice[j].amount == 5 {
+            for j in dice.indices where j > i && dice[i].amount + dice[j].amount == total {
                 entryCombinations.append([dice[i].id, dice[j].id])
             }
         }
         if !entryCombinations.isEmpty {
             for pawn in state.pawns where owned.contains(pawn.color) && pawn.isInNest {
-                guard !state.isBlockade(atRing: Board.entryIndex(for: pawn.color)) else { continue }
+                let entry = Board.entryIndex(for: pawn.color)
+                guard !state.isBlockade(atRing: entry) else { continue }
+                // Without blockades, a square still holds at most two of one player's pawns.
+                let seat = state.seat(owning: pawn.color)
+                guard state.pawns(onRing: entry).filter({ state.seat(owning: $0.color) == seat }).count < 2 else { continue }
                 moves += entryCombinations.map { .enter(pawn: pawn.id, spending: $0) }
             }
         }
@@ -85,7 +94,18 @@ public enum Rules {
             }
         }
 
+        if state.rules.mustCapture {
+            let capturing = moves.filter { captures($0, in: state) }
+            if !capturing.isEmpty { return capturing }
+        }
         return moves
+    }
+
+    /// Whether a move would send an opponent back to their nest.
+    public static func captures(_ move: Move, in state: GameState) -> Bool {
+        guard case .ring(let index)? = landing(of: move, in: state) else { return false }
+        let mover = state.seat(owning: move.pawn.color)
+        return state.pawns(onRing: index).contains { state.seat(owning: $0.color) != mover }
     }
 
     /// Where a move would leave its pawn, or nil when the move does not apply.
@@ -103,12 +123,19 @@ public enum Rules {
     /// Where a pawn lands, or nil when the move is illegal.
     public static func destination(for pawn: Pawn, advancing amount: Int, in state: GameState) -> PawnPosition? {
         guard let from = pawn.progress, amount > 0 else { return nil }
-        let target = from + amount
-        // Home needs an exact count, so overshooting is not a move.
+        var target = from + amount
+        if target > Board.homeProgress {
+            // Classic rules need an exact count to get home. With bounce back, the extra
+            // squares carry the pawn back down its home column instead.
+            guard state.rules.home == .bounce else { return nil }
+            target = Board.homeProgress - (target - Board.homeProgress)
+            guard target > Board.homeEntryProgress else { return nil }
+        }
         guard let landing = Board.position(atProgress: target, for: pawn.color) else { return nil }
 
         // No pawn may pass or land on a blockade, not even one of its own color.
-        for step in (from + 1)...target {
+        let farthest = min(from + amount, Board.homeProgress)
+        for step in (from + 1)...max(from + 1, farthest) {
             if case .ring(let index)? = Board.position(atProgress: step, for: pawn.color),
                state.isBlockade(atRing: index) {
                 return nil
@@ -170,10 +197,10 @@ public enum Rules {
             state.turn.values.removeAll { $0.id == valueID }
         }
 
-        if outcome.captured != nil {
+        if outcome.captured != nil, state.rules.captureBonus {
             outcome.bonusesAwarded.append(issue(20, kind: .captureBonus, in: &state))
         }
-        if outcome.reachedHome {
+        if outcome.reachedHome, state.rules.homeBonus {
             outcome.bonusesAwarded.append(issue(10, kind: .homeBonus, in: &state))
         }
         state.turn.values += outcome.bonusesAwarded

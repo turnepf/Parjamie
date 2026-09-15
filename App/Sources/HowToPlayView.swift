@@ -11,6 +11,8 @@ enum HowToPlaySetting {
 struct HowToPlayView: View {
     /// Colors this phone plays. Empty when shown from the start screen before a game.
     var myColors: [PlayerColor] = []
+    /// The rules to explain. Classic from the start screen; the game's own during a game.
+    var rules: HouseRules = .classic
     var isLocal = false
     var otherName: String?
     @Environment(\.dismiss) private var dismiss
@@ -59,9 +61,9 @@ struct HowToPlayView: View {
 
                 section(title: "A turn") {
                     step(1, "Tap **Strike an arc** to roll the dice.")
-                    step(2, "To bring a helmet out you need a **5**: one die showing 5, or both dice adding up to 5. Tap the 5, then a helmet in your bay. It jumps to your start square.")
+                    step(2, "To bring a helmet out you need **\(rules.entryPhrase)**. Tap that number, then a helmet in your bay. It jumps to your start square.\(rules.quickStart ? " This game starts with one helmet already out." : "")")
                     step(3, "To move, tap a number, then a glowing helmet. It moves that many squares. Each die is used on its own, and you can split them between two helmets.")
-                    step(4, "Helmets travel **clockwise**, following the arrows. After nearly a full lap they turn up the painted home row in their own color and into the middle. Getting home takes an exact count.")
+                    step(4, "Helmets travel **clockwise**, following the arrows. After nearly a full lap they turn up the painted home row in their own color and into the middle. \(rules.home == .exact ? "Getting home takes an exact count." : "Overshoot home and the helmet bounces back by the extra squares.")")
                     step(5, "Roll doubles and you roll again after moving.")
                 }
 
@@ -75,23 +77,35 @@ struct HowToPlayView: View {
                     keyRow(sample: { HomeRowSample(color: myColors.first ?? .red) },
                            title: "Painted row with arrows",
                            text: "A home row. Only helmets of that color can go up it, to the middle.")
-                    keyRow(sample: { BlockadeSample(color: myColors.first ?? .red) },
-                           title: "Two helmets welded together",
-                           text: "A blockade. Two helmets on one square block it. Nobody can pass or land there, not even their owner.")
+                    if rules.blockades {
+                        keyRow(sample: { BlockadeSample(color: myColors.first ?? .red) },
+                               title: "Two helmets welded together",
+                               text: "A blockade. Two helmets on one square block it. Nobody can pass or land there, not even their owner.")
+                    }
                 }
 
                 section(title: "Capturing") {
-                    Text("Land exactly on the other player's helmet and it gets sent back to its bay. You earn **+20** squares to spend on one of your helmets.")
+                    Text("Land exactly on the other player's helmet and it gets sent back to its bay.\(rules.captureBonus ? " You earn **+20** squares to spend on one of your helmets." : "")\(rules.mustCapture ? " If you can capture, you have to." : "")")
                         .modifier(GuideText())
                     Text("A helmet on a safe square (purple, or any X) is protected. You can't land on it at all. The one exception: bringing a helmet out onto your own start square bumps anyone sitting there.")
                         .modifier(GuideText())
                 }
 
                 section(title: "Bonuses and penalties") {
-                    Text("**+10** when a helmet reaches home, to spend on another helmet.")
-                        .modifier(GuideText())
-                    Text("**Overheated!** Three doubles in a row sends your farthest helmet back to its bay, and your turn ends.")
-                        .modifier(GuideText())
+                    if rules.homeBonus {
+                        Text("**+10** when a helmet reaches home, to spend on another helmet.")
+                            .modifier(GuideText())
+                    }
+                    switch rules.threeDoubles {
+                    case .sendBack:
+                        Text("**Overheated!** Three doubles in a row sends your farthest helmet back to its bay, and your turn ends.")
+                            .modifier(GuideText())
+                    case .loseTurn:
+                        Text("Three doubles in a row ends your turn.")
+                            .modifier(GuideText())
+                    case .nothing:
+                        EmptyView()
+                    }
                     Text("If no helmet can use a number, it's skipped.")
                         .modifier(GuideText())
                 }

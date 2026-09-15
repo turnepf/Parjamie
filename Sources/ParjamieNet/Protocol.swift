@@ -4,7 +4,7 @@ import ParjamieEngine
 /// Bumped whenever the messages below change shape. The two devices compare this
 /// during the handshake so a stale build says so instead of corrupting a game.
 public enum ProtocolVersion {
-    public static let current = 3
+    public static let current = 4
 }
 
 public enum BonjourService {

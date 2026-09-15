@@ -31,7 +31,7 @@ public enum Hints {
         let noneInPlay = pawns.allSatisfy { $0.isInNest || $0.isHome }
         if noneInPlay {
             let shuffled = state.hasShuffledSafeSpots ? " Safe spots are shuffled this game, so look for the purple squares." : ""
-            return "Tap Strike an arc to roll. To bring a helmet out of your bay you need a 5: one die showing 5, or both dice adding up to 5." + shuffled
+            return "Tap Strike an arc to roll. To bring a helmet out of your bay you need \(state.rules.entryPhrase)." + shuffled
         }
         return "Tap Strike an arc to roll the dice."
     }
@@ -48,10 +48,10 @@ public enum Hints {
         let orMove = advances ? " Or tap a glowing helmet on the board to move it \(value.amount) spaces." : ""
 
         if enters {
-            if value.amount == 5 {
+            if state.rules.entryFaces.contains(value.amount) {
                 return "Tap a glowing helmet in your bay to bring it onto your start square." + orMove
             }
-            return "Tap a glowing helmet in your bay to bring it out. That uses your \(value.amount) and \(5 - value.amount) together." + orMove
+            return "Tap a glowing helmet in your bay to bring it out. That uses your \(value.amount) and \(state.rules.entryTotal - value.amount) together." + orMove
         }
         return "Tap a glowing helmet to move it \(value.amount) spaces. The outline shows where it will land."
     }
@@ -73,12 +73,13 @@ public enum Hints {
             if case .enter(_, let ids) = move { ids } else { nil }
         }
         let dice = values.filter { $0.kind == .die }
-        if enterMoves.contains(where: { $0.count == 1 }) {
-            parts.append("You have a 5, so you can bring a helmet out: tap the 5, then a glowing helmet in your bay.")
+        if let single = enterMoves.first(where: { $0.count == 1 }),
+           let face = dice.first(where: { $0.id == single[0] }) {
+            parts.append("You have a \(face.amount), so you can bring a helmet out: tap the \(face.amount), then a glowing helmet in your bay.")
         } else if let pair = enterMoves.first(where: { $0.count == 2 }),
                   let a = dice.first(where: { $0.id == pair[0] }),
                   let b = dice.first(where: { $0.id == pair[1] }) {
-            parts.append("Your \(a.amount) and \(b.amount) add up to 5, so you can bring a helmet out: tap either one, then a glowing helmet in your bay.")
+            parts.append("Your \(a.amount) and \(b.amount) add up to \(a.amount + b.amount), so you can bring a helmet out: tap either one, then a glowing helmet in your bay.")
         } else if entryIsBlocked(in: state) {
             parts.append("Two helmets are welded together on your start square, which blocks it. Move one of them off before bringing out another.")
         }
@@ -116,7 +117,7 @@ public enum Hints {
             if selected?.kind != nil && selected?.kind != .die {
                 return "Bonus moves can't bring a helmet out. Pick a die instead."
             }
-            return "Helmets leave the bay only on a 5: one die showing 5, or two dice adding up to 5."
+            return "Helmets leave the bay only on \(state.rules.entryPhrase)."
         }
 
         let amounts = selected.map { [$0] } ?? state.turn.values
@@ -124,7 +125,7 @@ public enum Hints {
             return "That helmet has no move with this roll."
         }
         let reason: String
-        if Board.position(atProgress: progress + value.amount, for: pawn.color) == nil {
+        if Board.position(atProgress: progress + value.amount, for: pawn.color) == nil, state.rules.home == .exact {
             reason = "it would overshoot home. Getting in needs an exact count"
         } else if (1...value.amount).contains(where: { step in
             if case .ring(let index)? = Board.position(atProgress: progress + step, for: pawn.color) {
@@ -145,10 +146,10 @@ public enum Hints {
     /// Whether a pawn could have entered on these dice if its starting square were not blockaded.
     private static func entryIsBlocked(in state: GameState) -> Bool {
         let dice = state.turn.values.filter { $0.kind == .die }.map(\.amount)
-        let hasFive = dice.contains(5) || dice.indices.contains { i in
-            dice.indices.contains { j in j > i && dice[i] + dice[j] == 5 }
+        let canEnter = dice.contains(where: state.rules.entryFaces.contains) || dice.indices.contains { i in
+            dice.indices.contains { j in j > i && dice[i] + dice[j] == state.rules.entryTotal }
         }
-        guard hasFive else { return false }
+        guard canEnter else { return false }
         return state.pawns(for: state.turn.seat).contains {
             $0.isInNest && state.isBlockade(atRing: Board.entryIndex(for: $0.color))
         }

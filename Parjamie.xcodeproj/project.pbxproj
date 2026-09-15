@@ -14,6 +14,7 @@
 		5B8904DB469E10A84D02D490 /* burst.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCD49919B5DF3A818A222D8F /* burst.wav */; };
 		6614DF17081FAE48273DDF37 /* HowToPlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A287F7A09DFEC151585376D /* HowToPlayView.swift */; };
 		9919E43141608E278FA74DD3 /* sizzle.wav in Resources */ = {isa = PBXBuildFile; fileRef = 40C69D377EE45388C255A27C /* sizzle.wav */; };
+		9AC97CCA908C90FF7BF49043 /* HouseRulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367113BC9BAF91E217792AE8 /* HouseRulesView.swift */; };
 		9FE8A51EAC9666B9A104044C /* ParjamieNet in Frameworks */ = {isa = PBXBuildFile; productRef = 1E417820269079549451F213 /* ParjamieNet */; };
 		ACE5AE3B5A9DFD5035F29F57 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A365AC16B0682B4AD40B7E47 /* GameView.swift */; };
 		AEB76F2E92C4A0AFF356107B /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB82E920B2773644403644A /* BoardView.swift */; };
@@ -30,6 +31,7 @@
 		05B1FE3E5DBA1F4B0D65BF39 /* Parjamie */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Parjamie; path = .; sourceTree = SOURCE_ROOT; };
 		0680F4462C09C0C893DF8E7E /* LobbyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyView.swift; sourceTree = "<group>"; };
 		248CD3E3733B4AECE6595852 /* ScoreboardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardStore.swift; sourceTree = "<group>"; };
+		367113BC9BAF91E217792AE8 /* HouseRulesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseRulesView.swift; sourceTree = "<group>"; };
 		40C69D377EE45388C255A27C /* sizzle.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sizzle.wav; sourceTree = "<group>"; };
 		714737E2AB25950DC0148D34 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		7A287F7A09DFEC151585376D /* HowToPlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowToPlayView.swift; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 				03FE5289B5D6ED2B1B6ED31C /* DiceView.swift */,
 				A2E9201B94A672D43A21CCC6 /* Effects.swift */,
 				A365AC16B0682B4AD40B7E47 /* GameView.swift */,
+				367113BC9BAF91E217792AE8 /* HouseRulesView.swift */,
 				7A287F7A09DFEC151585376D /* HowToPlayView.swift */,
 				0680F4462C09C0C893DF8E7E /* LobbyView.swift */,
 				E79AE7381721BA0886CF7E59 /* ParjamieApp.swift */,
@@ -211,6 +214,7 @@
 				BB6E7C5559C2808D45F61512 /* DiceView.swift in Sources */,
 				C6271452B1562B125935C073 /* Effects.swift in Sources */,
 				ACE5AE3B5A9DFD5035F29F57 /* GameView.swift in Sources */,
+				9AC97CCA908C90FF7BF49043 /* HouseRulesView.swift in Sources */,
 				6614DF17081FAE48273DDF37 /* HowToPlayView.swift in Sources */,
 				2FE860A20336048E1381E7B9 /* LobbyView.swift in Sources */,
 				DA4295D9BF3C04338EA359F9 /* ParjamieApp.swift in Sources */,

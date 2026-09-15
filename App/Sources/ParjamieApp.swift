@@ -33,11 +33,6 @@ enum SecondPlayerName {
     static let key = "secondPlayerName"
 }
 
-/// Whether new games move the purple safe squares. Off unless the player turns it on.
-enum ShuffleSafeSpotsSetting {
-    static let key = "shuffleSafeSpots"
-}
-
 /// Turn-by-turn coaching for people learning the game. On unless the player turns it off.
 enum HintSetting {
     static let key = "showHints"
