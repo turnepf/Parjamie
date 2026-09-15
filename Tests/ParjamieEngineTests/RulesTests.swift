@@ -205,6 +205,29 @@ final class RulesTests: XCTestCase {
         XCTAssertNil(Rules.apply(.advance(pawn: blue(0), spending: 0), to: &game))
         XCTAssertNil(Rules.apply(.advance(pawn: red(0), spending: 42), to: &game))
     }
+
+    // MARK: Two colors each
+
+    func testYourOtherColorIsNeverCaptured() throws {
+        // Red and yellow both belong to seat one in the two-color setup.
+        let yellow0 = PawnID(color: .yellow, index: 0)
+        let target = try XCTUnwrap(Board.position(atProgress: 3, for: .red))
+        guard case .ring(let index) = target else { return XCTFail("expected a ring square") }
+        XCTAssertFalse(Board.isSafety(ring: index))
+
+        var game = state(placing: [(red(0), afterRed(0)), (yellow0, target)], values: [3, 6])
+        XCTAssertNotNil(Rules.apply(.advance(pawn: red(0), spending: 0), to: &game))
+        XCTAssertEqual(game[yellow0]?.position, target, "your own yellow stays put")
+        XCTAssertEqual(game[red(0)]?.position, target, "red joins it on the square")
+        XCTAssertFalse(game.turn.values.contains { $0.kind == .captureBonus }, "no bonus for landing on yourself")
+    }
+
+    func testEnteringDoesNotBumpYourOtherColor() {
+        let yellow0 = PawnID(color: .yellow, index: 0)
+        var game = state(placing: [(yellow0, afterRed(0))], values: [5, 2])
+        XCTAssertNotNil(Rules.apply(.enter(pawn: red(0), spending: [0]), to: &game))
+        XCTAssertEqual(game[yellow0]?.position, afterRed(0))
+    }
 }
 
 final class SelfPlayTests: XCTestCase {
@@ -251,4 +274,5 @@ final class SelfPlayTests: XCTestCase {
         let restored = try JSONDecoder().decode(GameState.self, from: data)
         XCTAssertEqual(game, restored)
     }
+
 }

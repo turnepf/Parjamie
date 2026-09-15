@@ -120,7 +120,8 @@ public enum Rules {
             let occupants = state.pawns(onRing: index).filter { $0.id != pawn.id }
             guard occupants.count < 2 else { return nil }
             guard let other = occupants.first else { return landing }
-            if other.color == pawn.color { return landing }
+            // A player's own helmets, in either of their colors, may share a square.
+            if state.seat(owning: other.color) == state.seat(owning: pawn.color) { return landing }
             // Safety squares shelter their occupant from being bumped.
             return Board.isSafety(ring: index) ? nil : landing
         case .homeColumn(let step):
@@ -146,7 +147,7 @@ public enum Rules {
         case .enter(let pawnID, let spending):
             let entry = Board.entryIndex(for: pawnID.color)
             // Entering bumps an opponent off the entry square even though it is a safety.
-            if let victim = state.pawns(onRing: entry).first(where: { $0.color != pawnID.color }) {
+            if let victim = state.pawns(onRing: entry).first(where: { state.seat(owning: $0.color) != state.seat(owning: pawnID.color) }) {
                 state.update(victim.id, to: .nest)
                 outcome.captured = victim.id
             }
@@ -160,7 +161,7 @@ public enum Rules {
             else { return nil }
 
             if case .ring(let index) = landing,
-               let victim = state.pawns(onRing: index).first(where: { $0.color != pawnID.color }) {
+               let victim = state.pawns(onRing: index).first(where: { state.seat(owning: $0.color) != state.seat(owning: pawnID.color) }) {
                 state.update(victim.id, to: .nest)
                 outcome.captured = victim.id
             }
