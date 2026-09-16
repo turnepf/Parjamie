@@ -58,3 +58,5 @@ Parjamie is a two-player board game. Everything runs on device; there are no acc
 To review it on a single device, tap "Vs computer" on the start screen and choose Sparky (easy) or Torch (hard), or tap "Together" to play both sides on one device. Turn on "Hints" (on by default) for turn-by-turn guidance.
 
 Two-device play uses Bonjour on the local network: on one device tap "Host a game", on the other tap "Join a game" and pick the host. The Local Network permission prompt is used only to find the other player's device.
+
+On the Mac (Mac Catalyst) build, the app carries both the network.client and network.server sandbox entitlements because either device in a match can be the "host": hosting starts an NWListener that advertises over Bonjour and accepts the incoming connection from the other player's device (network.server), while joining a hosted game browses for it and dials out with NWConnection (network.client). Both are peer-to-peer between the two players' own devices on their local network — there is no internet-facing server, no listening service reachable from outside that network, and no data leaves the local network.

@@ -2,7 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Mac apps run sandboxed. Finding and hosting games needs both directions of networking. -->
+	<!-- Peer-to-peer local-network multiplayer: either device can be the host, which needs
+	     network.server to accept the other player's incoming Bonjour connection, or the
+	     guest, which needs network.client to dial out. See docs/app-store-listing.md. -->
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
 	<key>com.apple.security.network.client</key>
