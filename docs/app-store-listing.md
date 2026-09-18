@@ -1,8 +1,10 @@
 # App Store listing
 
 The text entered in App Store Connect for Parjamie. Keep this file in step with what is
-live there. Parjamie implements Pachisi (<https://en.wikipedia.org/wiki/Pachisi>), whose
-rules are public domain; never name any of the commercial adaptations of it.
+live there, except for the "Pending for the next version" section at the end, which holds
+text that is written but not yet submitted. Parjamie implements Pachisi
+(<https://en.wikipedia.org/wiki/Pachisi>), whose rules are public domain; never name any of
+the commercial adaptations of it.
 
 ## App information
 
@@ -68,3 +70,13 @@ matching functionality; spelling the hosting behavior out in the Mac notes is wh
 it. The entitlements are correct as they stand — `MatchSession` creates an `NWListener` when
 hosting — so nothing in the binary needed to change. The live Mac notes also say "click" and
 "on a single Mac" where the iOS notes say "tap" and "on a single device".
+
+## Pending for the next version
+
+Not live. The App Store description can only change when a new version is submitted, so
+apply this at the next release and then fold it into the sections above.
+
+- **Description** — add as a new paragraph directly after the opening line ("Strike an arc
+  and race your welding helmets home..."):
+
+  > Parjamie plays by the rules of Pachisi, the classic cross-and-circle race game from India.
