@@ -1,12 +1,15 @@
 import XCTest
 import CryptoKit
 
-/// The trademarked name of the commercial board game must never appear in the app,
+/// Parjamie implements Pachisi, whose rules are public domain. The trademarked names of
+/// the twentieth-century commercial adaptations of Pachisi must never appear in the app,
 /// its code, or its project files. See CLAUDE.md.
 final class NamingTests: XCTestCase {
 
     /// SHA-256 fingerprints of the forbidden spellings, lowercase, letters only. Stored as
-    /// hashes so the name itself never appears in this repository.
+    /// hashes so no such name ever appears in this repository. "Pachisi" itself is fine —
+    /// it is seven letters, outside the window lengths below, and names the public-domain
+    /// game this one is built from.
     private let forbidden: Set<String> = [
         "ee8f9078c21a5d8225056089a72058814e2a98061489d6e1aff123cce71aa984",
         "b48b8fd8f1d2424d52bede82995ede23992c02a560f5b599c67de9875b47f26a",
@@ -14,7 +17,7 @@ final class NamingTests: XCTestCase {
     ]
     private let lengths = [8, 9]
 
-    func testTrademarkedGameNameIsNotUsedAnywhere() throws {
+    func testNoAdaptationTrademarkIsUsedAnywhere() throws {
         let root = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
@@ -38,7 +41,7 @@ final class NamingTests: XCTestCase {
                 }
             }
         }
-        XCTAssertTrue(offenders.isEmpty, "Trademarked game name found in: \(offenders.joined(separator: ", "))")
+        XCTAssertTrue(offenders.isEmpty, "Trademarked adaptation name found in: \(offenders.joined(separator: ", "))")
     }
 
     func testTheCheckRecognisesAFingerprintedWord() {

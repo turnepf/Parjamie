@@ -1,7 +1,8 @@
 # App Store listing
 
 The text entered in App Store Connect for Parjamie. Keep this file in step with what is
-live there, and never mention the commercial game this is based on by name.
+live there. Parjamie implements Pachisi (<https://en.wikipedia.org/wiki/Pachisi>), whose
+rules are public domain; never name any of the commercial adaptations of it.
 
 ## App information
 
