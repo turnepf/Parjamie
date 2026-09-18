@@ -22,7 +22,7 @@ the commercial adaptations of it.
 
 ## Promotional text (170)
 
-Roll, race and weld your helmets home. Play a friend on two phones, pass one phone around, or take on Torch, the computer welder.
+Pachisi, the classic race game from India, rebuilt as a welding shop. Play a friend on two phones, pass one phone around, or take on Torch, the computer welder.
 
 ## Description
 
@@ -73,10 +73,14 @@ hosting — so nothing in the binary needed to change. The live Mac notes also s
 
 ## Pending for the next version
 
-Not live. The App Store description can only change when a new version is submitted, so
+Not live. On a released version App Store Connect only reopens Promotional Text and
+Copyright; Description, Keywords and the URLs stay locked until a new version exists. So
 apply this at the next release and then fold it into the sections above.
 
 - **Description** — add as a new paragraph directly after the opening line ("Strike an arc
   and race your welding helmets home..."):
 
   > Parjamie plays by the rules of Pachisi, the classic cross-and-circle race game from India.
+
+Pachisi is already named in the promotional text, which was editable on the live version and
+was updated on 2026-09-18.
