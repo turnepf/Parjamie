@@ -462,8 +462,11 @@ struct GameView: View {
         return guides
     }
 
+    /// The board never turns to face whoever's holding the phone: on one phone, passing
+    /// it back and forth already tells players whose turn it is, and rotating the whole
+    /// board on top of that just made people lose track of where their pawns were.
     private func viewingColor(_ game: GameState) -> PlayerColor {
-        game.colors(for: session.viewingSeat).first ?? .red
+        game.colors(for: session.mySeat).first ?? .red
     }
 
     private func availableMoves(_ game: GameState) -> [Move] {
