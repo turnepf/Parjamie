@@ -28,6 +28,8 @@ Pachisi, the classic race game from India, rebuilt as a welding shop. Play a fri
 
 Strike an arc and race your welding helmets home in Parjamie, a classic cross-and-circle dice game set in a welding shop.
 
+Parjamie plays by the rules of Pachisi, the classic cross-and-circle race game from India.
+
 Roll the dice, bring your helmets out of their bay, run them once around the diamond-plate board, and weld every one of them home before your opponent does. Land on the other player's helmet to send it back. Shelter on the purple safe squares. Weld two helmets together into a blockade nobody can pass. Win, and you earn a stamped Certified Welder plate.
 
 PLAY YOUR WAY
@@ -73,14 +75,12 @@ hosting — so nothing in the binary needed to change. The live Mac notes also s
 
 ## Pending for the next version
 
-Not live. On a released version App Store Connect only reopens Promotional Text and
-Copyright; Description, Keywords and the URLs stay locked until a new version exists. So
-apply this at the next release and then fold it into the sections above.
+Nothing pending. The Pachisi paragraph that was waiting here went into the Description
+above when 1.0.1 was created on 2026-09-20, since a new version reopens that field.
 
-- **Description** — add as a new paragraph directly after the opening line ("Strike an arc
-  and race your welding helmets home..."):
+On a released version App Store Connect only reopens Promotional Text and Copyright;
+Description, Keywords and the URLs stay locked until a new version exists. Park text here
+when it cannot be applied yet, then fold it into the sections above at the next release.
 
-  > Parjamie plays by the rules of Pachisi, the classic cross-and-circle race game from India.
-
-Pachisi is already named in the promotional text, which was editable on the live version and
-was updated on 2026-09-18.
+Watch Promotional Text on a new version: it comes up **empty** rather than carrying over
+from the released version, so it has to be pasted in again or the product page loses it.
