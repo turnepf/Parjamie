@@ -18,3 +18,6 @@ blockades and sending opponents back on a capture.
   `Tests/ParjamieEngineTests/NamingTests.swift` fails if a forbidden spelling shows up
   in the project.
 - **The look is a welding shop on the traditional cross-and-circle layout** (Jamie is a professional welder). Diamond-plate steel track, a weld bead around the cross, tack-weld crosses on violet heat-tint safe squares (a shield badge marks a helmet sitting on one), painted floor bays with hazard brackets for the nests, a bolted flange with torch flames at home, welding-helmet pawns whose lenses light up when movable, and machined steel dice. Game moments are welding-themed too: blockades drawn as welded together, spark bursts on captures, "Overheated!" for three doubles, and a "Certified Welder" plate for the winner. Avoid the trade dress of the commercial adaptations: a square board with solid colored corner circles, their logos, or their box art.
+- **App Store releases go live on approval.** Every version submitted to App Review is set
+  to release automatically as soon as Apple approves it, on iOS and macOS alike. Never
+  choose manual or scheduled release.
