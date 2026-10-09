@@ -148,12 +148,22 @@ final class RulesTests: XCTestCase {
 
     // MARK: Doubles
 
-    func testDoublesWithEveryPawnOutGrantsFourMoves() {
-        var game = GameState(setup: .oneColorEach)
+    func testDoublesWithEveryPawnOutGrantsFourMovesWhenBottomsAreOn() {
+        var rules = HouseRules()
+        rules.doublesUseBottoms = true
+        var game = GameState(setup: .oneColorEach, rules: rules)
         for index in 0..<4 { game.update(red(index), to: Board.position(atProgress: index * 3, for: .red)!) }
         game.turn.phase = .awaitingRoll
         Rules.applyRoll(DiceRoll(first: 3, second: 3), to: &game)
         XCTAssertEqual(game.turn.values.map(\.amount).sorted(), [3, 3, 4, 4])
+    }
+
+    func testDoublesWithEveryPawnOutGrantsTwoMovesByDefault() {
+        var game = GameState(setup: .oneColorEach)
+        for index in 0..<4 { game.update(red(index), to: Board.position(atProgress: index * 3, for: .red)!) }
+        game.turn.phase = .awaitingRoll
+        Rules.applyRoll(DiceRoll(first: 3, second: 3), to: &game)
+        XCTAssertEqual(game.turn.values.map(\.amount).sorted(), [3, 3])
     }
 
     func testDoublesWithAPawnStillInTheNestGrantsTwoMoves() {
