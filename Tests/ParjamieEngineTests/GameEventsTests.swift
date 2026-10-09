@@ -47,6 +47,30 @@ final class GameEventsTests: XCTestCase {
         XCTAssertEqual(GameEvents.between(before, after), [.overheated(red(0), at: spot)])
     }
 
+    private func everyRedHelmetOut(bottoms: Bool) -> GameState {
+        var state = GameState(setup: .oneColorEach)
+        state.rules.doublesUseBottoms = bottoms
+        for index in 0..<4 { state.update(red(index), to: .ring((Board.entryIndex(for: .red) + index) % Board.ringLength)) }
+        return state
+    }
+
+    func testDoublesWithEveryHelmetOutAreBottomsUp() {
+        let before = everyRedHelmetOut(bottoms: true)
+        var after = before
+        Rules.applyRoll(DiceRoll(first: 3, second: 3), to: &after)
+        XCTAssertEqual(after.turn.values.map(\.amount), [3, 3, 4, 4])
+        XCTAssertEqual(GameEvents.between(before, after), [.bottomsOfTheDice(DiceRoll(first: 3, second: 3))])
+    }
+
+    func testBottomsAreOffByDefault() {
+        XCTAssertFalse(HouseRules.classic.doublesUseBottoms)
+        let before = everyRedHelmetOut(bottoms: false)
+        var after = before
+        Rules.applyRoll(DiceRoll(first: 3, second: 3), to: &after)
+        XCTAssertEqual(after.turn.values.map(\.amount), [3, 3])
+        XCTAssertEqual(GameEvents.between(before, after), [])
+    }
+
     func testANewGameProducesNoEvents() {
         var before = GameState(setup: .oneColorEach)
         before.update(red(0), to: .ring(3))

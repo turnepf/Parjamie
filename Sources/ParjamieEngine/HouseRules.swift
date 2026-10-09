@@ -36,8 +36,9 @@ public struct HouseRules: Hashable, Codable, Sendable {
     public var captureBonus = true
     /// +10 for getting a helmet home.
     public var homeBonus = true
-    /// Doubles with every helmet out also give the bottoms of the dice.
-    public var doublesUseBottoms = true
+    /// Doubles with every helmet out also give the bottoms of the dice. Off by default,
+    /// because four moves from one roll surprises people who haven't met the rule.
+    public var doublesUseBottoms = false
     /// Two helmets on a square block everyone.
     public var blockades = true
     /// Each color starts with one helmet already on its start square.

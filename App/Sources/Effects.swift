@@ -147,6 +147,30 @@ struct OverheatedBanner: View {
     }
 }
 
+/// Flashed over the board when doubles with every helmet out earn the bottoms of the dice.
+struct BottomsBanner: View {
+    let roll: DiceRoll
+
+    var body: some View {
+        let top = roll.first, bottom = 7 - roll.first
+        VStack(spacing: 4) {
+            Text("BOTTOMS UP!")
+                .font(.rounded(30, .black))
+                .tracking(2)
+                .foregroundStyle(.linearGradient(colors: [.white, Color(red: 0.75, green: 0.6, blue: 1)], startPoint: .top, endPoint: .bottom))
+                .shadow(color: Color(red: 0.45, green: 0.2, blue: 0.9), radius: 12)
+            Text("Doubles with every helmet out. The bottoms of the dice count too: \(top), \(top), \(bottom), \(bottom).")
+                .font(.rounded(13, .semibold))
+                .foregroundStyle(.white.opacity(0.9))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 22)
+        .padding(.vertical, 16)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.black.opacity(0.72)))
+        .padding(30)
+    }
+}
+
 /// The end-of-game plate, stamped like a welding certification.
 struct CertifiedPlate: View {
     let winnerName: String

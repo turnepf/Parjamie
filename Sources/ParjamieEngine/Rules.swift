@@ -27,10 +27,7 @@ public enum Rules {
             state.turn.consecutiveDoubles = 0
         }
 
-        // Rolling doubles with every pawn out of the nest also grants the underside of
-        // each die, so the seat gets four moves instead of two.
-        let everyPawnOut = state.pawns(for: state.turn.seat).allSatisfy { !$0.isInNest }
-        let amounts: [Int] = roll.isDoubles && everyPawnOut && state.rules.doublesUseBottoms
+        let amounts: [Int] = grantsBottoms(roll, in: state)
             ? [roll.first, roll.first, 7 - roll.first, 7 - roll.first]
             : [roll.first, roll.second]
 
@@ -38,6 +35,14 @@ public enum Rules {
         state.turn.phase = .moving
         state.version += 1
         resolvePhase(of: &state)
+    }
+
+    /// Under the bottoms-of-the-dice house rule, rolling doubles with every pawn out of
+    /// the nest also grants the underside of each die, so the seat gets four moves
+    /// instead of two.
+    public static func grantsBottoms(_ roll: DiceRoll, in state: GameState) -> Bool {
+        roll.isDoubles && state.rules.doublesUseBottoms
+            && state.pawns(for: state.turn.seat).allSatisfy { !$0.isInNest }
     }
 
     /// Three doubles in a row ends the turn, and under the classic rule also sends the

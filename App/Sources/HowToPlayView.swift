@@ -96,6 +96,10 @@ struct HowToPlayView: View {
                         Text("**+10** when a helmet reaches home, to spend on another helmet.")
                             .modifier(GuideText())
                     }
+                    if rules.doublesUseBottoms {
+                        Text("**Bottoms up!** Roll doubles with every helmet out and you also get the numbers on the bottoms of the dice, for four moves.")
+                            .modifier(GuideText())
+                    }
                     switch rules.threeDoubles {
                     case .sendBack:
                         Text("**Overheated!** Three doubles in a row sends your farthest helmet back to its bay, and your turn ends.")
