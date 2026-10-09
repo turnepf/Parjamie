@@ -9,6 +9,7 @@ struct GameView: View {
     @AppStorage(SoundSetting.key) private var playSounds = true
     @State private var effects: [BoardEffect] = []
     @State private var showOverheated = false
+    @State private var bottomsRoll: DiceRoll?
     @State private var moveTick = 0
     @State private var captureTick = 0
     @State private var homeTick = 0
@@ -118,6 +119,10 @@ struct GameView: View {
                 reconnectingBanner
             } else if showOverheated {
                 OverheatedBanner()
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    .allowsHitTesting(false)
+            } else if let roll = bottomsRoll {
+                BottomsBanner(roll: roll)
                     .transition(.scale(scale: 0.8).combined(with: .opacity))
                     .allowsHitTesting(false)
             }
@@ -393,6 +398,12 @@ struct GameView: View {
                 Task {
                     try? await Task.sleep(for: .seconds(2.2))
                     withAnimation(.easeOut(duration: 0.3)) { showOverheated = false }
+                }
+            case .bottomsOfTheDice(let roll):
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { bottomsRoll = roll }
+                Task {
+                    try? await Task.sleep(for: .seconds(2.2))
+                    withAnimation(.easeOut(duration: 0.3)) { if bottomsRoll == roll { bottomsRoll = nil } }
                 }
             case .won(let winner):
                 winTick += 1

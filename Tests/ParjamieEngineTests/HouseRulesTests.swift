@@ -124,7 +124,7 @@ final class HouseRulesTests: XCTestCase {
         everything.threeDoubles = .nothing
         everything.captureBonus = false
         everything.homeBonus = false
-        everything.doublesUseBottoms = false
+        everything.doublesUseBottoms = true
         everything.blockades = false
         everything.quickStart = true
         everything.mustCapture = true

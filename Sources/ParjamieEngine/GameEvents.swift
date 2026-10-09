@@ -13,6 +13,8 @@ public enum GameEvent: Hashable, Sendable {
     case reachedHome(PawnID)
     /// Three doubles in a row sent this pawn back to its nest.
     case overheated(PawnID, at: PawnPosition)
+    /// Doubles with every pawn out also earned the bottoms of the dice: four moves.
+    case bottomsOfTheDice(DiceRoll)
     case won(Seat)
 }
 
@@ -25,8 +27,17 @@ public enum GameEvents {
               old.setup == new.setup,
               old.pawns.map(\.id) == new.pawns.map(\.id) else { return [] }
 
-        var sentBack: [(PawnID, PawnPosition)] = []
         var events: [GameEvent] = []
+        // A doubles roll is the only thing that bumps the doubles count. The three-doubles
+        // penalty resets it, and that roll gets no moves at all.
+        if old.turn.phase == .awaitingRoll,
+           new.turn.seat == old.turn.seat,
+           new.turn.consecutiveDoubles == old.turn.consecutiveDoubles + 1,
+           let roll = new.turn.roll, Rules.grantsBottoms(roll, in: old) {
+            events.append(.bottomsOfTheDice(roll))
+        }
+
+        var sentBack: [(PawnID, PawnPosition)] = []
         for (before, after) in zip(old.pawns, new.pawns) where before.position != after.position {
             if after.position == .nest {
                 sentBack.append((after.id, before.position))
