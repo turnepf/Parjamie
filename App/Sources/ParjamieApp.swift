@@ -6,7 +6,7 @@ struct ParjamieApp: App {
     @State private var session = MatchSession(
         displayName: UserDefaults.standard.string(forKey: PlayerName.key) ?? ""
     )
-    @State private var scoreboard = ScoreboardStore()
+    @State private var scoreboard = ScoreboardStore(cloud: ScoreboardStore.usesCloud ? .default : nil)
 
     var body: some Scene {
         WindowGroup {
@@ -20,6 +20,17 @@ struct ParjamieApp: App {
                     session.onScoreboardReceived = { [scoreboard] in scoreboard.merge($0) }
                 }
         }
+    }
+}
+
+extension ScoreboardStore {
+    /// The staged screenshot games stay out of the player's real iCloud scoreboard.
+    static var usesCloud: Bool {
+        #if DEBUG
+        ScreenshotScene.current == nil
+        #else
+        true
+        #endif
     }
 }
 
