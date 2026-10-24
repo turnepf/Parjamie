@@ -5,52 +5,53 @@ import SwiftUI
 ///
 /// This follows Apple's layout guidance for iPhone Duo, iPad and the Mac: decide from the
 /// space the game has, never from the device or the orientation, and fill the screen in
-/// every pose instead of letterboxing. On iOS 27.1 and later it is an `ArrangementView`,
-/// which also moves the two halves clear of the fold when an iPhone Duo is partly folded.
-/// Earlier systems get the same two arrangements from the window's shape.
+/// every pose instead of letterboxing. When an iPhone Duo is partly folded, the board goes
+/// on one side of the fold and the controls on the other, so nothing sits in the crease.
+///
+/// This is the split that `ArrangementView` describes, built by hand: on iOS 27.1 the
+/// arrangement view ignored its sizing modifiers and never reported its split direction,
+/// which left the board in half the screen with the controls laid out the wrong way.
 struct BoardAndControls<Board: View, Controls: View>: View {
     @ViewBuilder var board: Board
     @ViewBuilder var controls: Controls
 
     /// Wide enough for the header, a hint and the roll button, narrow enough to leave the
     /// board most of the room.
-    static var columnWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) { (300, 350, 400) }
+    static var columnWidth: CGFloat { 350 }
 
     var body: some View {
-        if #available(iOS 27.1, macCatalyst 27.1, *) {
-            ArrangementView {
-                ArrangementAxisReader { board }
-            } secondary: {
-                ArrangementAxisReader { controls }
-                    .splitArrangementLayoutSize(minWidth: Self.columnWidth.min, idealWidth: Self.columnWidth.ideal, maxWidth: Self.columnWidth.max)
-                    .splitArrangementFixedLayoutSize(horizontal: false, vertical: true)
-                    .layoutPriority(1)
+        GeometryReader { proxy in
+            let fold = Self.fold(in: proxy)
+            let axis: Axis = if let fold {
+                // A fold running top to bottom splits the screen into left and right.
+                fold.height > fold.width ? .horizontal : .vertical
+            } else {
+                proxy.size.width > proxy.size.height ? .horizontal : .vertical
             }
-            .arrangementViewStyle(.split)
-        } else {
-            GeometryReader { proxy in
-                let axis: Axis = proxy.size.width > proxy.size.height ? .horizontal : .vertical
-                let layout = axis == .horizontal ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
-                layout {
+            let layout = axis == .horizontal ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
+
+            layout {
+                if let fold {
+                    board
+                        .frame(width: axis == .horizontal ? fold.minX : nil, height: axis == .vertical ? fold.minY : nil)
+                    Color.clear
+                        .frame(width: axis == .horizontal ? fold.width : nil, height: axis == .vertical ? fold.height : nil)
+                    controls
+                } else {
                     board
                     controls
-                        .frame(width: axis == .horizontal ? Self.columnWidth.ideal : nil)
+                        .frame(width: axis == .horizontal ? Self.columnWidth : nil)
                         .fixedSize(horizontal: false, vertical: axis == .vertical)
                 }
-                .environment(\.boardControlsAxis, axis)
             }
+            .environment(\.boardControlsAxis, axis)
         }
     }
-}
 
-/// Passes the arrangement's split direction on to the board and controls.
-@available(iOS 27.1, macCatalyst 27.1, *)
-private struct ArrangementAxisReader<Content: View>: View {
-    @Environment(\.splitArrangementAxis) private var axis
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        content.environment(\.boardControlsAxis, axis ?? .vertical)
+    /// Where the fold crosses this view while an iPhone Duo is partly open.
+    private static func fold(in proxy: GeometryProxy) -> CGRect? {
+        guard #available(iOS 27.1, macCatalyst 27.1, *) else { return nil }
+        return proxy.reservedRegions(kind: .division).first(where: \.isActive)?.frame
     }
 }
 
