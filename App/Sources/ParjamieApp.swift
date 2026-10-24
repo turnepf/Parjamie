@@ -50,13 +50,13 @@ enum HintSetting {
 }
 
 extension RootView {
-    /// On the Mac the game runs in a resizable window. Keep it tall enough for the board
-    /// and its controls, and no wider than looks right.
+    /// On the Mac the game runs in a resizable window. Keep it big enough that the board
+    /// stays playable; past that, a tall window puts the controls under the board and a
+    /// wide one puts them beside it.
     func limitMacWindowSize() {
         #if targetEnvironment(macCatalyst)
         for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
-            scene.sizeRestrictions?.minimumSize = CGSize(width: 520, height: 860)
-            scene.sizeRestrictions?.maximumSize = CGSize(width: 1100, height: 1400)
+            scene.sizeRestrictions?.minimumSize = CGSize(width: 520, height: 640)
         }
         #endif
     }

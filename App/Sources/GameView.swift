@@ -61,47 +61,41 @@ struct GameView: View {
 
     // MARK: Layout
 
+    /// The board with the controls under it when the space is tall, as on an iPhone, or
+    /// beside it in a column when the space is wide, as on an open iPhone Duo, an iPad in
+    /// landscape or a wide Mac window.
     private func board(_ game: GameState) -> some View {
-        VStack(spacing: 0) {
-            header(game)
-            hintCard(game)
-            Spacer(minLength: 0)
-
-            BoardView(
-                game: game,
-                viewingColor: viewingColor(game),
-                movable: movablePawns(game),
-                selected: nil,
-                effects: effects,
-                guides: guides(game),
-                bayLabels: bayLabels(game),
-                onTap: { tap($0, in: game) }
-            )
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .overlay(alignment: .top) {
-                if let nudge {
-                    Text(nudge)
-                        .font(.rounded(14, .semibold))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(Capsule().fill(Color.black.opacity(0.82)))
-                        .overlay(Capsule().stroke(Palette.arc.opacity(0.7), lineWidth: 1))
-                        .padding(.horizontal, 24)
-                        .padding(.top, 14)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .onTapGesture { withAnimation { self.nudge = nil } }
+        BoardAndControls {
+            ForBoardControlsAxis { axis in
+                VStack(spacing: 0) {
+                    if axis == .vertical {
+                        header(game)
+                        hintCard(game)
+                    }
+                    Spacer(minLength: 0)
+                    boardView(game)
+                    Spacer(minLength: 0)
                 }
+                // On iPad and Mac, keep the header and controls close to the board.
+                .frame(maxWidth: axis == .vertical ? 760 : .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-
-            diceRow(game)
-            Spacer(minLength: 8)
-            rollButton(game)
+        } controls: {
+            ForBoardControlsAxis { axis in
+                VStack(spacing: 0) {
+                    if axis == .horizontal {
+                        header(game)
+                        hintCard(game)
+                        Spacer(minLength: 16)
+                    }
+                    diceRow(game)
+                    rollButton(game)
+                        .padding(.top, 8)
+                }
+                .frame(maxWidth: axis == .vertical ? 760 : .infinity)
+                .frame(maxWidth: .infinity, maxHeight: axis == .horizontal ? .infinity : nil)
+            }
         }
-        // On iPad and Mac, keep the header and controls close to the board.
-        .frame(maxWidth: 760)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .overlay {
             if let winner = game.winner {
@@ -130,6 +124,37 @@ struct GameView: View {
         .onChange(of: game.turn.values) { _, values in
             // With only one amount in hand there is nothing to choose between.
             selectedValueID = values.count == 1 ? values.first?.id : nil
+        }
+    }
+
+    private func boardView(_ game: GameState) -> some View {
+        BoardView(
+            game: game,
+            viewingColor: viewingColor(game),
+            movable: movablePawns(game),
+            selected: nil,
+            effects: effects,
+            guides: guides(game),
+            bayLabels: bayLabels(game),
+            onTap: { tap($0, in: game) }
+        )
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .overlay(alignment: .top) {
+            if let nudge {
+                Text(nudge)
+                    .font(.rounded(14, .semibold))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Capsule().fill(Color.black.opacity(0.82)))
+                    .overlay(Capsule().stroke(Palette.arc.opacity(0.7), lineWidth: 1))
+                    .padding(.horizontal, 24)
+                    .padding(.top, 14)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .onTapGesture { withAnimation { self.nudge = nil } }
+            }
         }
     }
 

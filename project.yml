@@ -34,12 +34,16 @@ targets:
         # compliance question.
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
-        UIRequiresFullScreen: true
+        # iPhone stays upright. iPad turns every way and shares the screen in Split View
+        # and Stage Manager; the game lays itself out for whatever space it gets. The
+        # iPhone Duo inner display ignores this list, so the game handles landscape there.
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         UISupportedInterfaceOrientations~ipad:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         NSLocalNetworkUsageDescription: >-
           Parjamie looks for the other player's phone on your network so the two of you can play.
         NSBonjourServices:
