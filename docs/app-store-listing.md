@@ -48,7 +48,7 @@ Play the classic rules or make them your own: bring helmets out on a 5, a 6, or 
 THE WELDING SHOP
 • Sparks fly on every capture, with an arc crackle and a buzz you can feel
 • Overheat on three doubles in a row
-• A scoreboard that remembers every game, kept in step across both devices
+• A scoreboard that remembers every game, kept in step across both devices and saved to your iCloud for your next phone
 
 No ads. No tracking. No data collected.
 
@@ -58,7 +58,7 @@ board game,dice,race,two player,pachisi,family,welding,local multiplayer,classic
 
 ## Review notes
 
-Parjamie is a two-player board game. Everything runs on device; there are no accounts, servers or in-app purchases.
+Parjamie is a two-player board game. Everything runs on device; there are no accounts, servers or in-app purchases. The scoreboard is also kept in the player's own iCloud key-value storage so it carries to a new device.
 
 To review it on a single device, tap "Vs computer" on the start screen and choose Sparky (easy) or Torch (hard), or tap "Together" to play both sides on one device. Turn on "Hints" (on by default) for turn-by-turn guidance.
 

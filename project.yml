@@ -60,4 +60,5 @@ targets:
         # A native Mac app built from the same code, sharing the iPhone app's bundle ID.
         SUPPORTS_MACCATALYST: YES
         DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER: NO
+        CODE_SIGN_ENTITLEMENTS: App/Resources/Parjamie.entitlements
         "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": App/Resources/Parjamie-Mac.entitlements
