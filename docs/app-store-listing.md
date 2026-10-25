@@ -64,15 +64,28 @@ Parjamie now fits every screen. On iPhone Duo and on iPad in landscape, the boar
 
 ## Custom product pages
 
-**iPhone Duo** — submitted to App Review 2026-10-25; live on approval at
+**iPhone Duo** — submitted to App Review 2026-10-25, then pulled and resubmitted the same day
+with real Duo screenshots; live on approval at
 https://apps.apple.com/us/app/parjamie/id6812052207?ppid=a67a81c7-3553-4426-8b1a-6964fb679d2b
 
 Promotional text:
 
 Built for iPhone Duo. Open it up and the whole board fills the screen, with the controls beside it and nothing in the fold. Pachisi, rebuilt as a welding shop.
 
-Screenshots: three Duo shots (game, win, lobby) made by `scripts/custom-page-screenshots.py`
-in the 6.5" iPhone slot, plus the six iPad shots from the main listing.
+Screenshots:
+
+- **iPhone Duo slot (`APP_IPHONE_DUO`):** `docs/screenshots/duo/` — game, win, lobby and
+  scores, 1398×2034, from the closed Duo's outer display. Taken on the Duo simulator with
+  `xcrun simctl io <sim> screenshot --display=1`, launched with the same arguments as
+  `scripts/app-store-screenshots.sh`. Simulator PNGs have an alpha channel, which App Store
+  Connect rejects, so each went through JPEG with `sips` to drop it. The simulator can't
+  unfold, so there are no inner-display (2007×2853) shots yet.
+- **6.5" iPhone slot:** the three framed Duo shots made by `scripts/custom-page-screenshots.py`
+  (from before App Store Connect's Duo slot was found).
+- **iPad 13":** the six shots from the main listing.
+
+The same `docs/screenshots/duo/` set goes on the main listing with the next version, which is
+what earns the "optimized for iPhone Duo" badge.
 
 ## Review notes
 
