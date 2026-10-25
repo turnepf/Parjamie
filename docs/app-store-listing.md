@@ -75,8 +75,16 @@ hosting — so nothing in the binary needed to change. The live Mac notes also s
 
 ## Pending for the next version
 
-Nothing pending. The Pachisi paragraph that was waiting here went into the Description
-above when 1.0.1 was created on 2026-09-20, since a new version reopens that field.
+**macOS 1.0.4 (build 12).** Uploaded 2026-10-24 alongside iOS 1.0.4, which went to review
+the same day. It waits for macOS 1.0.3 (build 11) to clear review, since a platform can
+have only one version in flight. Then create macOS 1.0.4, release on approval, attach
+build 12, re-paste the Promotional Text, and use this What's New (the Mac wording):
+
+Parjamie now fits any window. Make the window wide and the board fills its height with the
+controls beside it; make it tall and the controls sit under the board.
+
+The Pachisi paragraph that was waiting here went into the Description above when 1.0.1 was
+created on 2026-09-20, since a new version reopens that field.
 
 On a released version App Store Connect only reopens Promotional Text and Copyright;
 Description, Keywords and the URLs stay locked until a new version exists. Park text here

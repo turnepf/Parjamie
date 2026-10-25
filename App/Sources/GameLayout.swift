@@ -50,8 +50,13 @@ struct BoardAndControls<Board: View, Controls: View>: View {
 
     /// Where the fold crosses this view while an iPhone Duo is partly open.
     private static func fold(in proxy: GeometryProxy) -> CGRect? {
-        guard #available(iOS 27.1, macCatalyst 27.1, *) else { return nil }
+        // A Mac window never folds, and the Mac SDK has no reserved regions.
+        #if targetEnvironment(macCatalyst)
+        return nil
+        #else
+        guard #available(iOS 27.1, *) else { return nil }
         return proxy.reservedRegions(kind: .division).first(where: \.isActive)?.frame
+        #endif
     }
 }
 
