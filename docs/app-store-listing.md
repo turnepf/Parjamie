@@ -62,6 +62,18 @@ board game,dice,race,two player,pachisi,family,welding,local multiplayer,classic
 
 Parjamie now fits every screen. On iPhone Duo and on iPad in landscape, the board fills the screen with the controls beside it, and nothing sits in the fold. iPad also turns any way and works in Split View and Stage Manager.
 
+## Custom product pages
+
+**iPhone Duo** — submitted to App Review 2026-10-25; live on approval at
+https://apps.apple.com/us/app/parjamie/id6812052207?ppid=a67a81c7-3553-4426-8b1a-6964fb679d2b
+
+Promotional text:
+
+Built for iPhone Duo. Open it up and the whole board fills the screen, with the controls beside it and nothing in the fold. Pachisi, rebuilt as a welding shop.
+
+Screenshots: three Duo shots (game, win, lobby) made by `scripts/custom-page-screenshots.py`
+in the 6.5" iPhone slot, plus the six iPad shots from the main listing.
+
 ## Review notes
 
 Parjamie is a two-player board game. Everything runs on device; there are no accounts, servers or in-app purchases. The scoreboard is also kept in the player's own iCloud key-value storage so it carries to a new device.
