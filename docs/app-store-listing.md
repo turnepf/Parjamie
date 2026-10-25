@@ -56,6 +56,12 @@ No ads. No tracking. No data collected.
 
 board game,dice,race,two player,pachisi,family,welding,local multiplayer,classic,strategy,cross
 
+## What's New
+
+**iOS 1.0.4 (build 12)**, approved and released 2026-10-25:
+
+Parjamie now fits every screen. On iPhone Duo and on iPad in landscape, the board fills the screen with the controls beside it, and nothing sits in the fold. iPad also turns any way and works in Split View and Stage Manager.
+
 ## Review notes
 
 Parjamie is a two-player board game. Everything runs on device; there are no accounts, servers or in-app purchases. The scoreboard is also kept in the player's own iCloud key-value storage so it carries to a new device.
