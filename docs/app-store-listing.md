@@ -65,7 +65,8 @@ Parjamie now fits every screen. On iPhone Duo and on iPad in landscape, the boar
 ## Custom product pages
 
 **iPhone Duo** — submitted to App Review 2026-10-25, then pulled and resubmitted the same day
-with real Duo screenshots; live on approval at
+with real Duo screenshots; approved 2026-10-25 (submission `d484d972-4245-4509-b3db-6c337be04443`)
+and live at
 https://apps.apple.com/us/app/parjamie/id6812052207?ppid=a67a81c7-3553-4426-8b1a-6964fb679d2b
 
 Promotional text:
