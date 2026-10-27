@@ -108,9 +108,11 @@ hosting — so nothing in the binary needed to change. The live Mac notes also s
 ## Pending for the next version
 
 **macOS 1.0.4 (build 12).** Uploaded 2026-10-24 alongside iOS 1.0.4, which went to review
-the same day. It waits for macOS 1.0.3 (build 11) to clear review, since a platform can
-have only one version in flight. Then create macOS 1.0.4, release on approval, attach
-build 12, re-paste the Promotional Text, and use this What's New (the Mac wording):
+the same day. It waited for macOS 1.0.3 (build 11) to clear review, since a platform can
+have only one version in flight; 1.0.3 was submitted 2026-10-24 and approved (submission
+`b54ccc3f-f111-447d-88c0-17cbc210b616`), so the slot is now open. Next: create macOS 1.0.4,
+release on approval, attach build 12, re-paste the Promotional Text, and use this What's New
+(the Mac wording):
 
 Parjamie now fits any window. Make the window wide and the board fills its height with the
 controls beside it; make it tall and the controls sit under the board.
