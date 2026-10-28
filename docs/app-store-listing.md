@@ -62,6 +62,12 @@ board game,dice,race,two player,pachisi,family,welding,local multiplayer,classic
 
 Parjamie now fits every screen. On iPhone Duo and on iPad in landscape, the board fills the screen with the controls beside it, and nothing sits in the fold. iPad also turns any way and works in Split View and Stage Manager.
 
+**macOS 1.0.4 (build 12)**, submitted to App Review 2026-10-28 (submission
+`3c41e26d-8695-4182-8bf9-4d2902f328da`), releases on approval:
+
+Parjamie now fits any window. Make the window wide and the board fills its height with the
+controls beside it; make it tall and the controls sit under the board.
+
 ## Custom product pages
 
 **iPhone Duo** — submitted to App Review 2026-10-25, then pulled and resubmitted the same day
@@ -107,15 +113,9 @@ hosting — so nothing in the binary needed to change. The live Mac notes also s
 
 ## Pending for the next version
 
-**macOS 1.0.4 (build 12).** Uploaded 2026-10-24 alongside iOS 1.0.4, which went to review
-the same day. It waited for macOS 1.0.3 (build 11) to clear review, since a platform can
-have only one version in flight; 1.0.3 was submitted 2026-10-24 and approved (submission
-`b54ccc3f-f111-447d-88c0-17cbc210b616`), so the slot is now open. Next: create macOS 1.0.4,
-release on approval, attach build 12, re-paste the Promotional Text, and use this What's New
-(the Mac wording):
-
-Parjamie now fits any window. Make the window wide and the board fills its height with the
-controls beside it; make it tall and the controls sit under the board.
+Nothing is waiting. macOS 1.0.4 sat here until macOS 1.0.3 (build 11, submission
+`b54ccc3f-f111-447d-88c0-17cbc210b616`) was approved, since a platform can have only one
+version in flight; it went to review 2026-10-28 and its What's New is above.
 
 The Pachisi paragraph that was waiting here went into the Description above when 1.0.1 was
 created on 2026-09-20, since a new version reopens that field.
