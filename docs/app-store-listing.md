@@ -62,8 +62,8 @@ board game,dice,race,two player,pachisi,family,welding,local multiplayer,classic
 
 Parjamie now fits every screen. On iPhone Duo and on iPad in landscape, the board fills the screen with the controls beside it, and nothing sits in the fold. iPad also turns any way and works in Split View and Stage Manager.
 
-**macOS 1.0.4 (build 12)**, submitted to App Review 2026-10-28 (submission
-`3c41e26d-8695-4182-8bf9-4d2902f328da`), releases on approval:
+**macOS 1.0.4 (build 12)**, submitted to App Review and approved 2026-10-28 (submission
+`3c41e26d-8695-4182-8bf9-4d2902f328da`), released on approval:
 
 Parjamie now fits any window. Make the window wide and the board fills its height with the
 controls beside it; make it tall and the controls sit under the board.
@@ -115,7 +115,7 @@ hosting — so nothing in the binary needed to change. The live Mac notes also s
 
 Nothing is waiting. macOS 1.0.4 sat here until macOS 1.0.3 (build 11, submission
 `b54ccc3f-f111-447d-88c0-17cbc210b616`) was approved, since a platform can have only one
-version in flight; it went to review 2026-10-28 and its What's New is above.
+version in flight; it went to review and was approved 2026-10-28, and its What's New is above.
 
 The Pachisi paragraph that was waiting here went into the Description above when 1.0.1 was
 created on 2026-09-20, since a new version reopens that field.
